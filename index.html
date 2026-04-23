@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBEA — Gestão de Emendas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+    :root {
+  --navy: #1B2A4A;
+  --navy2: #243658;
+  --gold: #C5A55A;
+  --gold2: #D4B96E;
+  --gold-bg: rgba(197, 165, 90, .08);
+  --bg: #F3F4F8;
+  --bg2: #FFF;
+  --bg3: #E8EBF0;
+  --card: #FFF;
+  --card2: #F7F8FB;
+  --tx: #1A1D26;
+  --tx2: #4A5068;
+  --tx3: #8890A4;
+  --border: #DEE1EA;
+  --border2: #ECEEF3;
+  --green: #1EA85A;
+  --green-bg: rgba(30, 168, 90, .1);
+  --yellow: #D9960A;
+  --yellow-bg: rgba(217, 150, 10, .1);
+  --orange: #D06818;
+  --orange-bg: rgba(208, 104, 24, .1);
+  --red: #C82838;
+  --red-bg: rgba(200, 40, 56, .1);
+  --blue: #2E6EE6;
+  --blue-bg: rgba(46, 110, 230, .1);
+  --purple: rgba(124, 77, 204, .1);
+  --purple-tx: #7C4DCC;
+  --r: 10px;
+  --r-sm: 6px;
+  --r-lg: 14px;
+  --sh: 0 1px 3px rgba(0, 0, 0, .06);
+  --sh-lg: 0 6px 24px rgba(0, 0, 0, .1);
+  --sidebar-w: 250px;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme="dark"] {
+  --bg: #0C0F16;
+  --bg2: #14181F;
+  --bg3: #1C2028;
+  --card: #171B24;
+  --card2: #1E222C;
+  --tx: #E0E3EA;
+  --tx2: #9CA3B8;
+  --tx3: #606878;
+  --border: #262C38;
+  --border2: #202630;
+  --sh: 0 1px 3px rgba(0, 0, 0, .2);
+  --sh-lg: 0 6px 24px rgba(0, 0, 0, .35);
+  --gold-bg: rgba(197, 165, 90, .1);
+  --green-bg: rgba(30, 168, 90, .14);
+  --yellow-bg: rgba(217, 150, 10, .14);
+  --orange-bg: rgba(208, 104, 24, .14);
+  --red-bg: rgba(200, 40, 56, .14);
+  --blue-bg: rgba(46, 110, 230, .14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--tx);
+  display: flex;
+  min-height: 100vh;
+  transition: background .3s, color .3s;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, select, textarea {
+  font-family: inherit;
+  font-size: .84rem;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--tx);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  width: 100%;
+  transition: border .2s, box-shadow .2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(197, 165, 90, .12);
+}
+textarea { resize: vertical; min-height: 70px; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 6 5-6' fill='none' stroke='%238890A4' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--tx2);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+a { color: var(--gold); text-decoration: none; cursor: pointer; }
+a:hover { text-decoration: underline; }
+
+/* Layout */
+.sb {
+  width: var(--sidebar-w);
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: transform .3s;
+}
+.sb-brand {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.sb-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--navy);
+  font-size: .9rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sb-logo img { width: 100%; height: 100%; object-fit: cover; }
+.sb-brand-t { font-size: .78rem; line-height: 1.35; color: rgba(255, 255, 255, .8); }
+.sb-brand-t strong { display: block; font-size: .88rem; color: var(--gold); }
+
+.sb-nav { flex: 1; padding: 10px 8px; overflow-y: auto; }
+.sb-sec {
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, .25);
+  padding: 18px 14px 6px;
+  font-weight: 700;
+}
+.ni {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: var(--r);
+  color: rgba(255, 255, 255, .6);
+  font-size: .82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  margin-bottom: 1px;
+}
+.ni:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.ni.act { background: rgba(197, 165, 90, .18); color: var(--gold); }
+.ni svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .65; }
+.ni.act svg { opacity: 1; }
+.ni-dis { opacity: .35; cursor: default; pointer-events: none; }
+.sb-ft { padding: 12px 16px; border-top: 1px solid rgba(255, 255, 255, .06); font-size: .65rem; color: rgba(255, 255, 255, .3); text-align: center; }
+
+.mn { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.tb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 28px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.tb-t { font-size: 1.05rem; font-weight: 700; }
+.tb-a { display: flex; align-items: center; gap: 6px; }
+.btn-t {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx2);
+  transition: all .2s;
+}
+.btn-t:hover { background: var(--gold-bg); color: var(--gold); }
+
+.ct { flex: 1; padding: 22px 28px; }
+
+/* Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--r-sm);
+  font-size: .82rem;
+  font-weight: 600;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-p { background: var(--gold); color: var(--navy); }
+.btn-p:hover { background: var(--gold2); box-shadow: 0 2px 8px rgba(197, 165, 90, .3); }
+.btn-s { background: var(--bg3); color: var(--tx2); }
+.btn-s:hover { background: var(--border); }
+.btn-sm { padding: 5px 12px; font-size: .76rem; }
+.btn-i {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  background: var(--bg3);
+  color: var(--tx2);
+  display: inline-flex;
+  align-items: center;
+  font-size: .85rem;
+}
+.btn-i:hover { background: var(--gold-bg); color: var(--gold); }
+
+.g { display: grid; gap: 14px; }
+.g2 { grid-template-columns: 1fr 1fr; }
+.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+@media(max-width:900px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+
+.fld { display: flex; flex-direction: column; }
+.sep {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 22px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold-bg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+[data-theme="dark"] .sep { color: var(--gold); }
+
+.kpi-g {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.kpi {
+  background: var(--card);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.kpi:hover { box-shadow: var(--sh-lg); transform: translateY(-2px); border-color: var(--gold); }
+.kpi.kact { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(197, 165, 90, .2); }
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border2);
+  transition: background .2s;
+}
+.kpi:hover::before, .kpi.kact::before { background: var(--gold); }
+.kpi-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+.kpi-lb { font-size: .68rem; text-transform: uppercase; letter-spacing: .7px; color: var(--tx3); font-weight: 700; margin-bottom: 4px; }
+.kpi-vl { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
+.kpi-sb { font-size: .72rem; color: var(--tx3); margin-top: 4px; }
+
+.badge {
+  font-size: .65rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.b-green { background: var(--green-bg); color: var(--green); }
+.b-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.b-orange { background: var(--orange-bg); color: var(--orange); }
+.b-red { background: var(--red-bg); color: var(--red); }
+.b-blue { background: var(--blue-bg); color: var(--blue); }
+.b-gray { background: var(--bg3); color: var(--tx3); }
+.b-purple { background: var(--purple); color: var(--purple-tx); }
+
+.tbl-w { overflow-x: auto; border: 1px solid var(--border2); border-radius: var(--r-lg); background: var(--card); }
+.tbl { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.tbl th {
+  background: var(--navy);
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+[data-theme="dark"] .tbl th { background: var(--navy2); }
+.tbl td { padding: 8px 12px; border-bottom: 1px solid var(--border2); vertical-align: middle; }
+.tbl tr:hover td { background: var(--gold-bg); }
+.tbl .mono { font-family: var(--mono); font-size: .78rem; }
+
+.tbl-filter { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tbl-filter input, .tbl-filter select { width: auto; min-width: 160px; padding: 7px 12px; font-size: .8rem; }
+
+/* Modals */
+.mo {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.mo.open { display: flex; }
+.mo-c {
+  background: var(--card);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 800px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--sh-lg);
+}
+.mo-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 1;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.mo-h h3 { font-size: .98rem; font-weight: 700; }
+.mo-b { padding: 18px 22px; }
+.mo-f { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px; border-top: 1px solid var(--border); }
+
+.tabs { display: flex; gap: 1px; margin-bottom: 18px; background: var(--bg3); border-radius: var(--r); padding: 3px; width: fit-content; flex-wrap: wrap; }
+.tab { padding: 7px 16px; font-size: .8rem; font-weight: 600; color: var(--tx3); cursor: pointer; border-radius: var(--r-sm); transition: all .15s; }
+.tab:hover { color: var(--tx); }
+.tab.act { background: var(--bg2); color: var(--gold); box-shadow: var(--sh); }
+
+.tp { display: none; }
+.tp.act { display: block; }
+
+.empty { text-align: center; padding: 48px 20px; color: var(--tx3); }
+.empty-ic { font-size: 2.8rem; margin-bottom: 10px; opacity: .35; }
+.empty-t { font-size: .88rem; margin-bottom: 14px; }
+
+.bc { display: flex; gap: 6px; font-size: .76rem; color: var(--tx3); margin-bottom: 14px; }
+.row-acts { display: flex; gap: 4px; }
+
+.al { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r); margin-bottom: 5px; font-size: .8rem; border-left: 3px solid; }
+.al-w { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow); }
+.al-d { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+.al-i { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+.al-s { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+
+.saldo-layers { display: flex; gap: 2px; height: 10px; border-radius: 5px; overflow: hidden; background: var(--bg3); margin: 6px 0; }
+.sl-pago { background: var(--green); }
+.sl-emp { background: var(--blue); }
+.sl-comp { background: var(--yellow); }
+
+.pbar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.pfill { height: 100%; border-radius: 4px; transition: width .6s; }
+.pf-g { background: var(--green); }
+.pf-y { background: var(--yellow); }
+.pf-o { background: var(--orange); }
+.pf-r { background: var(--red); }
+
+/* Module Specifics */
+.ec-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.ec { background: var(--card); border: 1.5px solid var(--border2); border-radius: var(--r-lg); padding: 16px; cursor: pointer; transition: all .2s; }
+.ec:hover { box-shadow: var(--sh-lg); border-color: var(--gold); }
+.ec-h { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.ec-tt { font-weight: 700; font-size: .88rem; flex: 1; margin-right: 8px; line-height: 1.3; }
+.ec-info { display: flex; gap: 14px; font-size: .75rem; color: var(--tx2); margin-bottom: 12px; flex-wrap: wrap; }
+.ec-info span { display: flex; align-items: center; gap: 3px; }
+.ec-ft { display: flex; justify-content: space-between; font-size: .72rem; color: var(--tx3); }
+
+.rr { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card2); border: 1.5px solid var(--border2); border-radius: var(--r); margin-bottom: 8px; transition: all .15s; }
+.rr:hover { border-color: var(--gold); }
+.rr-info { flex: 1; min-width: 0; }
+.rr-name { font-weight: 700; font-size: .84rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rr-vals { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px; font-size: .72rem; color: var(--tx2); margin-top: 6px; }
+.rr-vals span { display: flex; flex-direction: column; }
+.rr-vals strong { font-size: .8rem; color: var(--tx); }
+
+.cc { background: var(--card); border: 1.5px solid var(--border2); border-radius: var(--r-lg); padding: 16px; transition: all .2s; cursor: pointer; }
+.cc:hover { box-shadow: var(--sh-lg); border-color: var(--gold); }
+.cc-h { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.cc-tt { font-weight: 700; font-size: .86rem; flex: 1; margin-right: 8px; }
+.cc-info { display: flex; gap: 10px; font-size: .73rem; color: var(--tx2); flex-wrap: wrap; margin-bottom: 8px; }
+.cc-info span { display: flex; align-items: center; gap: 3px; }
+
+.mc-card { background: var(--card2); border: 1.5px solid var(--border2); border-radius: var(--r); padding: 14px; margin-bottom: 8px; transition: all .15s; }
+.mc-card:hover { border-color: var(--gold); }
+.mc-card.mc-win { border-color: var(--green); background: var(--green-bg); }
+.mc-card .mc-name { font-weight: 700; font-size: .84rem; }
+.mc-card .mc-cnpj { font-size: .72rem; color: var(--tx3); }
+.mc-card .mc-val { font-size: 1.1rem; font-weight: 800; margin-top: 4px; }
+
+.foto-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
+.foto-item { position: relative; aspect-ratio: 1; border-radius: var(--r-sm); overflow: hidden; border: 1.5px solid var(--border2); background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: .7rem; color: var(--tx3); }
+.foto-item img { width: 100%; height: 100%; object-fit: cover; }
+.foto-item .foto-del { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: rgba(0, 0, 0, .6); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .65rem; cursor: pointer; }
+
+.steps { display: flex; gap: 0; margin-bottom: 22px; flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: .76rem; font-weight: 600; color: var(--tx3); border-bottom: 2px solid transparent; transition: all .15s; }
+.step.done { color: var(--green); border-color: var(--green); }
+.step.cur { color: var(--gold); border-color: var(--gold); }
+.step.pend { color: var(--tx3); }
+
+.ext-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border2); transition: background .15s; }
+.ext-row:hover { background: var(--gold-bg); }
+.ext-dt { font-size: .75rem; color: var(--tx3); min-width: 70px; font-family: var(--mono); }
+.ext-desc { flex: 1; font-size: .84rem; }
+.ext-desc strong { font-weight: 600; }
+.ext-val { font-family: var(--mono); font-size: .88rem; font-weight: 700; min-width: 110px; text-align: right; }
+.ext-val.cr { color: var(--green); }
+.ext-val.db { color: var(--red); }
+.ext-saldo { font-family: var(--mono); font-size: .78rem; color: var(--tx2); min-width: 110px; text-align: right; }
+
+.conc-ok { background: var(--green-bg); border-left: 3px solid var(--green); }
+.conc-div { background: var(--red-bg); border-left: 3px solid var(--red); }
+
+.rpt { background: var(--card); border: 1.5px solid var(--border2); border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 16px; }
+.rpt h4 { font-size: .9rem; font-weight: 700; margin-bottom: 10px; color: var(--tx); }
+.rpt-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border2); font-size: .82rem; }
+.rpt-row:last-child { border: none; font-weight: 700; }
+
+.logo-preview { width: 80px; height: 80px; border-radius: var(--r); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--bg3); font-size: .7rem; color: var(--tx3); cursor: pointer; transition: border-color .2s; }
+.logo-preview:hover { border-color: var(--gold); }
+.logo-preview img { width: 100%; height: 100%; object-fit: contain; }
+
+.tp-card { background: var(--card); border: 1.5px solid var(--border2); border-radius: var(--r-lg); padding: 18px; margin-bottom: 12px; }
+.tp-card h4 { font-size: .88rem; font-weight: 700; margin-bottom: 8px; }
+
+@media(max-width: 768px) {
+  .sb { transform: translateX(-100%); }
+  .sb.open { transform: none; }
+  .mn { margin-left: 0; }
+  .tb { padding: 10px 16px; }
+  .ct { padding: 14px 16px; }
+  .kpi-g { grid-template-columns: 1fr 1fr; }
+}
+.mt {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--bg3);
+  align-items: center;
+  justify-content: center;
+  color: var(--tx2);
+}
+@media(max-width: 768px) { .mt { display: flex; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.fade { animation: fadeUp .25s ease; }
+
+</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sb" id="sb">
+    <div class="sb-brand">
+      <div class="sb-logo" id="sbLogo">IB</div>
+      <div class="sb-brand-t">
+        <strong id="sbName">IBEA</strong>
+        <span id="sbOrg">Gestão de Emendas</span>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <div class="ni act" data-v="dash" onclick="go('dash')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="ni" data-v="emendas" onclick="go('emendas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Emendas
+      </div>
+      <div class="ni" data-v="planos" onclick="go('planos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Plano de Trabalho
+      </div>
+
+      <div class="sb-sec">Execução</div>
+      <div class="ni" data-v="compras" onclick="go('compras')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Compras & Cotações
+      </div>
+      <div class="ni" data-v="fin" onclick="go('fin')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Financeiro
+      </div>
+      <div class="ni" data-v="cc" onclick="go('cc')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Conta Corrente
+      </div>
+
+      <div class="sb-sec">Gestão</div>
+      <div class="ni" data-v="pc" onclick="go('pc')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Prestação de Contas
+      </div>
+      <div class="ni" data-v="transp" onclick="go('transp')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Transparência
+      </div>
+
+      <div class="sb-sec">Configurações</div>
+      <div class="ni" data-v="org" onclick="go('org')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>
+        Organização
+      </div>
+      <div class="ni" data-v="cad" onclick="go('cad')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Cadastros
+      </div>
+      <div class="ni" data-v="log" onclick="go('log')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Auditoria
+      </div>
+    </nav>
+
+    <div class="sb-ft">IBEA v1.1 © 2026</div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="mn">
+    <header class="tb">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mt" onclick="$('sb').classList.toggle('open')">☰</button>
+        <h2 class="tb-t" id="tbT">Dashboard</h2>
+      </div>
+      <div class="tb-a">
+        <button class="btn-t" onclick="toggleTheme()" title="Alternar Tema">
+          <svg id="thIc" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="ct" id="ct">
+      <!-- Injetado via JS -->
+    </div>
+  </main>
+
+  <!-- Modal Global -->
+  <div class="mo" id="mo">
+    <div class="mo-c">
+      <div class="mo-h">
+        <h3 id="moT">Título</h3>
+        <button class="btn-i" onclick="closeMo()">✕</button>
+      </div>
+      <div class="mo-b" id="moB">
+        <!-- Conteúdo do Modal -->
+      </div>
+      <div class="mo-f" id="moF">
+        <!-- Rodapé do Modal -->
+      </div>
+    </div>
+  </div>
+
+<script>
+    /* ══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE GESTÃO DE EMENDAS PARLAMENTAREAS - IBEA
+   Lógica Unificada - Versão 1.1 (Abril 2026)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════ CAMADA DE DADOS (DB) ════════════════ */
+const DB = {
+  _k: ns => 'ibea_' + ns,
+  all(ns) {
+    try { return JSON.parse(localStorage.getItem(this._k(ns))) || []; }
+    catch { return []; }
+  },
+  sv(ns, d) { localStorage.setItem(this._k(ns), JSON.stringify(d)); },
+  one(ns, id) { return this.all(ns).find(x => x.id === id) || null; },
+  ups(ns, item) {
+    const a = this.all(ns), i = a.findIndex(x => x.id === item.id), now = new Date().toISOString();
+    if (i >= 0) a[i] = { ...a[i], ...item, _u: now };
+    else a.push({ ...item, _c: now, _u: now });
+    this.sv(ns, a);
+  },
+  del(ns, id) { this.sv(ns, this.all(ns).filter(x => x.id !== id)); },
+  log(a, d) {
+    const l = this.all('log');
+    l.push({ id: uid(), act: a, det: d, ts: new Date().toISOString() });
+    if (l.length > 1000) l.splice(0, l.length - 1000);
+    this.sv('log', l);
+  }
+};
+
+/* ════════════════ UTILIDADES ════════════════ */
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36);
+const $ = id => document.getElementById(id);
+const F = {
+  R(v) { return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); },
+  P(v) { return (v || 0).toFixed(1) + '%'; },
+  D(iso) { if (!iso) return '—'; return new Date(iso + 'T12:00').toLocaleDateString('pt-BR'); },
+  DL(iso) { if (!iso) return 0; return Math.ceil((new Date(iso) - new Date()) / 864e5); },
+  N(v) { return parseFloat(String(v || '0').replace(/\./g, '').replace(',', '.')) || 0; }
+};
+
+function pC(p) { return p >= 99 ? 'pf-r' : p >= 90 ? 'pf-o' : p >= 80 ? 'pf-y' : 'pf-g'; }
+
+function maskM(el) {
+  if (!el) return;
+  el.addEventListener('input', () => {
+    let v = el.value.replace(/\D/g, '') || '0';
+    el.value = (parseInt(v) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  });
+}
+
+function mkSel(ns, id, val, ph) {
+  const items = DB.all(ns);
+  return '<select id="' + id + '" title="Selecione uma opção">' + (ph ? '<option value="">' + ph + '</option>' : '') + items.map(i => '<option value="' + i.codigo + '"' + (i.codigo === val ? ' selected' : '') + ' title="' + (i.obs || '') + '">' + i.codigo + ' — ' + i.descricao + '</option>').join('') + '</select>';
+}
+
+/* ════════════════ TEMA E INICIALIZAÇÃO ════════════════ */
+function toggleTheme() {
+  const d = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+  document.documentElement.setAttribute('data-theme', d);
+  localStorage.setItem('ibea_theme', d);
+  $('thIc').innerHTML = d === 'dark' ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>' : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+}
+
+function initDef() {
+  if (localStorage.getItem('ibea_init_v3')) return;
+  DB.sv('cad_modalidade', [
+    { id: uid(), codigo: '31', descricao: 'Transf. Estados — Fundo a Fundo', obs: 'Via fundo de saúde estadual' },
+    { id: uid(), codigo: '41', descricao: 'Transf. Municípios — Fundo a Fundo', obs: 'Via fundo de saúde municipal. Mais comum.' },
+    { id: uid(), codigo: '50', descricao: 'Transf. Inst. Privadas s/ Fins Lucrativos', obs: 'Recurso direto para OSC' },
+    { id: uid(), codigo: '90', descricao: 'Aplicação Direta', obs: 'Órgão executa diretamente' }
+  ]);
+  DB.sv('cad_gnd', [
+    { id: uid(), codigo: '3', descricao: 'Outras Desp. Correntes (Custeio)', obs: 'Gastos do dia a dia' },
+    { id: uid(), codigo: '4', descricao: 'Investimentos (Capital)', obs: 'Bens permanentes, obras, equipamentos' }
+  ]);
+  DB.sv('cad_acao', [
+    { id: uid(), codigo: '2E89', descricao: 'Incremento — Atenção Primária', obs: 'Portaria 1.263/2021 art.7' },
+    { id: uid(), codigo: '2E90', descricao: 'Incremento — Atenção Especializada', obs: 'Portaria 1.263/2021 art.8' },
+    { id: uid(), codigo: '8933', descricao: 'Estruturação — SAMU', obs: 'Urgências e emergências' },
+    { id: uid(), codigo: '8535', descricao: 'Estruturação — Atenção Especializada', obs: 'Rede de Cuidados' },
+    { id: uid(), codigo: '20YJ', descricao: 'Fortalecimento — Vigilância em Saúde', obs: 'Laboratórios, zoonoses' }
+  ]);
+  DB.sv('cad_instrumento', [
+    { id: uid(), codigo: 'TC', descricao: 'Termo de Colaboração', obs: 'Proposta do órgão público' },
+    { id: uid(), codigo: 'TF', descricao: 'Termo de Fomento', obs: 'Proposta da OSC' },
+    { id: uid(), codigo: 'AC', descricao: 'Acordo de Cooperação', obs: 'Sem transferência financeira' },
+    { id: uid(), codigo: 'CV', descricao: 'Convênio', obs: 'Instrumento tradicional' }
+  ]);
+  DB.sv('cad_tipo_rubrica', [
+    { id: uid(), codigo: 'MC', descricao: 'Material de Consumo', obs: 'Itens consumíveis' },
+    { id: uid(), codigo: 'MP', descricao: 'Material Permanente', obs: 'Bens duráveis. Exige 3 cotações e fotos.' },
+    { id: uid(), codigo: 'SPJ', descricao: 'Serviços PJ', obs: 'Empresas' },
+    { id: uid(), codigo: 'SPF', descricao: 'Serviços PF', obs: 'Pessoa física com RPA' },
+    { id: uid(), codigo: 'PE', descricao: 'Pessoal e Encargos', obs: 'Equipe do plano de trabalho' },
+    { id: uid(), codigo: 'CI', descricao: 'Custos Indiretos', obs: 'Internet, aluguel, água, luz' }
+  ]);
+  localStorage.setItem('ibea_init_v3', '1');
+}
+
+/* ════════════════ FUNÇÕES DE CÁLCULO COMPARTILHADAS ════════════════ */
+function tipoNome(cod) {
+  const t = DB.all('cad_tipo_rubrica').find(x => x.codigo === cod);
+  return t ? t.descricao : cod || '—';
+}
+
+function emNome(eid) {
+  const e = DB.one('emendas', eid);
+  return e ? (e.codigo || '') + '—' + (e.descricao || '').slice(0, 30) : '?';
+}
+
+function rubNome(rid) {
+  const r = DB.one('rubricas', rid);
+  return r ? r.descricao : '?';
+}
+
+function calcRS(rid) {
+  const c = DB.all('comprometidos').filter(x => x.rubricaId === rid),
+    p = DB.all('pagamentos').filter(x => x.rubricaId === rid);
+  return {
+    comp: c.filter(x => x.status === 'comprometido').reduce((s, x) => s + (x.valor || 0), 0),
+    emp: c.filter(x => x.status === 'empenhado').reduce((s, x) => s + (x.valor || 0), 0),
+    pago: p.reduce((s, x) => s + (x.valor || 0), 0)
+  };
+}
+
+function rubDisp(rid) {
+  const r = DB.one('rubricas', rid);
+  if (!r) return 0;
+  const s = calcRS(rid);
+  return (r.valor || 0) - s.comp - s.emp - s.pago;
+}
+
+function calcES(e) {
+  const rubs = DB.all('rubricas').filter(r => r.emendaId === e.id),
+    pg = DB.all('pagamentos').filter(p => p.emendaId === e.id),
+    cr = DB.all('creditos').filter(c => c.emendaId === e.id),
+    co = DB.all('comprometidos').filter(c => c.emendaId === e.id),
+    dv = DB.all('devolucoes').filter(d => d.emendaId === e.id),
+    rd = DB.all('rendimentos').filter(r => r.emendaId === e.id);
+
+  const prev = e.valor || 0,
+    rep = cr.reduce((s, c) => s + (c.valor || 0), 0),
+    rend = rd.reduce((s, r) => s + (r.valor || 0), 0),
+    gasto = pg.reduce((s, p) => s + (p.valor || 0), 0),
+    devol = dv.reduce((s, d) => s + (d.valor || 0), 0),
+    comp = co.filter(c => c.status === 'comprometido').reduce((s, c) => s + (c.valor || 0), 0),
+    emp = co.filter(c => c.status === 'empenhado').reduce((s, c) => s + (c.valor || 0), 0);
+
+  const rec = rep + rend;
+  const totalSaida = gasto + devol;
+
+  return {
+    prev,
+    rec,
+    gasto: totalSaida,
+    comp,
+    emp,
+    saldo: rec - totalSaida,
+    disp: prev - totalSaida - emp - comp,
+    pct: prev > 0 ? (totalSaida / prev * 100) : 0,
+    rubs
+  };
+}
+
+/* ════════════════ NAVEGAÇÃO ════════════════ */
+let curV = 'dash';
+let dF = null; // dash filter
+let eS = '', eFN = '', eFSt = ''; // emenda search/filter
+let cFilter = '', cSearch = '', cEmFilt = ''; // compras filter
+let cadTab = 'resp'; // cadastro active tab
+let cadSearch = '';
+let logSearch = '', logFilter = '';
+
+function go(v) {
+  curV = v;
+  document.querySelectorAll('.ni[data-v]').forEach(n => n.classList.toggle('act', n.dataset.v === v));
+  const tt = {
+    dash: 'Dashboard',
+    emendas: 'Emendas Parlamentares',
+    planos: 'Plano de Trabalho',
+    compras: 'Todas as Compras',
+    cotacoes: 'Cotações',
+    nfs: 'Notas Fiscais',
+    fin: 'Painel Financeiro',
+    cc: 'Conta Corrente',
+    pgtos: 'Pagamentos',
+    conc: 'Conciliação Bancária',
+    pc: 'Prestação de Contas',
+    transp: 'Transparência',
+    org: 'Perfil da Organização',
+    cad: 'Cadastros',
+    log: 'Log de Auditoria'
+  };
+  $('tbT').textContent = tt[v] || '';
+  $('sb').classList.remove('open');
+  const c = $('ct');
+  c.innerHTML = '';
+  c.className = 'ct fade';
+
+  // Routing
+  const routes = {
+    dash: rDash, emendas: rEmendas, planos: rPlanos,
+    compras: rCompras, cotacoes: rCotacoes, nfs: rNFs,
+    fin: rFin, cc: rCC, pgtos: rPgtos, conc: rConc,
+    pc: rPC, transp: rTransp,
+    org: rOrg, cad: rCad, log: rLog
+  };
+  routes[v]?.(c);
+}
+
+function openMo() { $('mo').classList.add('open'); }
+function closeMo() { $('mo').classList.remove('open'); }
+
+function loadOrg() {
+  try {
+    const o = JSON.parse(localStorage.getItem('ibea_cad_org') || '{}');
+    if (o.nome) $('sbName').textContent = o.nome.split(' ').slice(0, 2).join(' ');
+    if (o.nome) $('sbOrg').textContent = o.nome;
+    if (o.logos && o.logos[0]) $('sbLogo').innerHTML = '<img src="' + o.logos[0] + '" alt="Logo">';
+    document.title = (o.nome || 'Gestão de Emendas') + ' — ' + ($('tbT').textContent || 'IBEA');
+  } catch { }
+}
+
+/* ════════════════ MÓDULO NÚCLEO ════════════════ */
+
+function rDash(c) {
+  const ems = DB.all('emendas');
+  let tV = 0, tG = 0, tD = 0, at = 0;
+  const st = ems.map(e => {
+    const s = calcES(e);
+    tV += s.prev; tG += s.gasto; tD += s.disp;
+    if (e.status !== 'encerrada') at++;
+    return { ...e, ...s };
+  });
+  const als = bAlerts(st);
+
+  c.innerHTML = '<div class="kpi-g">' +
+    '<div class="kpi ' + (dF === 'at' ? 'kact' : '') + '" onclick="dF=dF===\'at\'?null:\'at\';go(\'dash\')" title="Filtrar emendas ativas"><div class="kpi-ic" style="background:var(--gold-bg);color:var(--gold)">📋</div><div class="kpi-lb">Emendas Ativas</div><div class="kpi-vl">' + at + '</div><div class="kpi-sb">de ' + ems.length + ' cadastradas</div></div>' +
+    '<div class="kpi ' + (dF === 'vl' ? 'kact' : '') + '" onclick="dF=dF===\'vl\'?null:\'vl\';go(\'dash\')" title="Ordenar por valor"><div class="kpi-ic" style="background:var(--green-bg);color:var(--green)">💰</div><div class="kpi-lb">Valor Total</div><div class="kpi-vl">' + F.R(tV) + '</div></div>' +
+    '<div class="kpi ' + (dF === 'gs' ? 'kact' : '') + '" onclick="dF=dF===\'gs\'?null:\'gs\';go(\'dash\')" title="Ordenar por execução"><div class="kpi-ic" style="background:var(--blue-bg);color:var(--blue)">📊</div><div class="kpi-lb">Executado</div><div class="kpi-vl">' + F.R(tG) + '</div><div class="kpi-sb">' + (tV > 0 ? F.P(tG / tV * 100) : '0%') + '</div></div>' +
+    '<div class="kpi ' + (dF === 'dp' ? 'kact' : '') + '" onclick="dF=dF===\'dp\'?null:\'dp\';go(\'dash\')" title="Filtrar com saldo"><div class="kpi-ic" style="background:var(--orange-bg);color:var(--orange)">🏦</div><div class="kpi-lb">Disponível</div><div class="kpi-vl">' + F.R(tD) + '</div></div></div>' +
+    (als.length ? '<div style="margin-bottom:18px">' + als.join('') + '</div>' : '') +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h3 style="font-size:.92rem;font-weight:700">Emendas ' + (dF ? '<span class="badge b-yellow" style="margin-left:4px">Filtrado</span> <a style="font-size:.72rem" onclick="dF=null;go(\'dash\')">Limpar</a>' : '') + '</h3><button class="btn btn-p" onclick="openEF()">+ Nova Emenda</button></div>' +
+    (st.length === 0 ? '<div class="empty"><div class="empty-ic">📋</div><div class="empty-t">Nenhuma emenda cadastrada.</div><button class="btn btn-p" onclick="openEF()">Cadastrar</button></div>' : rECards(aDF(st)));
+}
+
+function aDF(st) {
+  if (!dF) return st;
+  if (dF === 'at') return st.filter(e => e.status !== 'encerrada');
+  if (dF === 'vl') return [...st].sort((a, b) => b.prev - a.prev);
+  if (dF === 'gs') return [...st].sort((a, b) => b.pct - a.pct);
+  if (dF === 'dp') return st.filter(e => e.disp > 0).sort((a, b) => b.disp - a.disp);
+  return st;
+}
+
+function rECards(st) {
+  return '<div class="ec-g">' + st.map(e => {
+    const d = F.DL(e.vigenciaFim), p = Math.min(e.pct, 100),
+      pp = e.prev > 0 ? e.gasto / e.prev * 100 : 0,
+      ep = e.prev > 0 ? e.emp / e.prev * 100 : 0,
+      cp = e.prev > 0 ? e.comp / e.prev * 100 : 0;
+    return '<div class="ec" onclick="showED(\'' + e.id + '\')"><div class="ec-h"><div class="ec-tt">' +
+      (e.descricao || '—') + '</div><span class="badge ' + (e.status === 'encerrada' ? 'b-gray' : 'b-green') + '">' + (e.status || 'Ativa') + '</span></div>' +
+      '<div class="ec-info"><span>👤 ' + (e.parlamentar || '—') + '</span><span>📦 ' + (e.natureza || '—') + '</span><span>📅 ' + (d > 0 ? d + ' dias' : 'Vencida') + '</span></div>' +
+      '<div class="saldo-layers" title="🟢Pago ' + F.P(pp) + ' 🔵Empenhado ' + F.P(ep) + ' 🟡Comprometido ' + F.P(cp) + '"><div class="sl-pago" style="width:' + pp + '%"></div><div class="sl-emp" style="width:' + ep + '%"></div><div class="sl-comp" style="width:' + cp + '%"></div></div>' +
+      '<div class="ec-ft"><span>Pago: ' + F.R(e.gasto) + '</span><span>Disp: ' + F.R(e.disp) + '</span><span>' + F.P(p) + '</span></div></div>';
+  }).join('') + '</div>';
+}
+
+function bAlerts(st) {
+  const a = [];
+  st.forEach(e => {
+    if (e.status === 'encerrada') return;
+    if (e.pct >= 99) a.push('<div class="al al-d">🔴 "' + e.descricao + '" — ' + F.P(e.pct) + ' executado!</div>');
+    else if (e.pct >= 90) a.push('<div class="al al-d">🟠 "' + e.descricao + '" — saldo crítico (' + F.P(e.pct) + ').</div>');
+    else if (e.pct >= 80) a.push('<div class="al al-w">🟡 "' + e.descricao + '" — atenção ao saldo (' + F.P(e.pct) + ').</div>');
+    const d = F.DL(e.vigenciaFim);
+    if (d > 0 && d <= 30) a.push('<div class="al al-d">📅 "' + e.descricao + '" vence em ' + d + ' dias!</div>');
+    else if (d > 30 && d <= 90) a.push('<div class="al al-w">📅 "' + e.descricao + '" vence em ' + d + ' dias.</div>');
+  });
+  return a;
+}
+
+function rEmendas(c) {
+  const ems = DB.all('emendas');
+  let fl = ems;
+  if (eS) { const q = eS.toLowerCase(); fl = fl.filter(e => (e.descricao || '').toLowerCase().includes(q) || (e.codigo || '').toLowerCase().includes(q) || (e.parlamentar || '').toLowerCase().includes(q)); }
+  if (eFN) fl = fl.filter(e => e.natureza === eFN);
+  if (eFSt) fl = fl.filter(e => (e.status || 'ativa') === eFSt);
+  const st = fl.map(e => ({ ...e, ...calcES(e) })), tv = st.reduce((s, e) => s + e.prev, 0), tg = st.reduce((s, e) => s + e.gasto, 0);
+
+  c.innerHTML = '<div class="bc"><a onclick="go(\'dash\')">Dashboard</a> › Emendas</div>' +
+    '<div class="kpi-g" style="grid-template-columns:repeat(3,1fr)"><div class="kpi" style="cursor:default"><div class="kpi-lb">Listadas</div><div class="kpi-vl">' + fl.length + '</div></div><div class="kpi" style="cursor:default"><div class="kpi-lb">Valor Previsto</div><div class="kpi-vl">' + F.R(tv) + '</div></div><div class="kpi" style="cursor:default"><div class="kpi-lb">Executado</div><div class="kpi-vl">' + F.R(tg) + '</div></div></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div class="tbl-filter">' +
+    '<input placeholder="🔍 Pesquisar..." value="' + eS + '" oninput="eS=this.value;go(\'emendas\')" style="min-width:240px">' +
+    '<select onchange="eFN=this.value;go(\'emendas\')"><option value="">Natureza</option><option value="Consumo"' + (eFN === 'Consumo' ? ' selected' : '') + '>Consumo</option><option value="Permanente"' + (eFN === 'Permanente' ? ' selected' : '') + '>Permanente</option><option value="Misto"' + (eFN === 'Misto' ? ' selected' : '') + '>Misto</option></select>' +
+    '<select onchange="eFSt=this.value;go(\'emendas\')"><option value="">Status</option><option value="ativa"' + (eFSt === 'ativa' ? ' selected' : '') + '>Ativas</option><option value="encerrada"' + (eFSt === 'encerrada' ? ' selected' : '') + '>Encerradas</option></select>' +
+    '</div><button class="btn btn-p" onclick="openEF()">+ Nova Emenda</button></div>' +
+    (st.length === 0 ? '<div class="empty"><div class="empty-ic">📋</div><div class="empty-t">Nenhuma emenda encontrada.</div></div>' :
+      '<div class="tbl-w"><table class="tbl"><thead><tr><th>Cód.</th><th>Descrição</th><th>Parlamentar</th><th>Valor</th><th>Nat.</th><th>St.</th><th>Exec.</th><th>Ações</th></tr></thead><tbody>' + st.map(e => '<tr><td class="mono">' +
+        (e.codigo || '—') + '</td><td><a onclick="showED(\'' + e.id + '\')"><strong>' + (e.descricao || '—').slice(0, 45) + '</strong></a></td><td>' + (e.parlamentar || '—') + '</td><td class="mono">' + F.R(e.prev) + '</td><td><span class="badge b-blue">' + (e.natureza || '—') + '</span></td><td><span class="badge ' + (e.status === 'encerrada' ? 'b-gray' : 'b-green') + '">' + (e.status || 'Ativa') + '</span></td><td><div class="pbar" style="width:60px"><div class="pfill ' + pC(e.pct) + '" style="width:' + Math.min(e.pct, 100) + '%"></div></div></td><td><div class="row-acts"><button class="btn-i" onclick="event.stopPropagation();openEF(\'' + e.id + '\')">✏️</button><button class="btn-i" onclick="event.stopPropagation();delE(\'' + e.id + '\')">🗑️</button></div></td></tr>').join('') + '</tbody></table></div>');
+}
+
+function openEF(id) {
+  const e = id ? DB.one('emendas', id) : {};
+  $('moT').textContent = id ? 'Editar Emenda' : 'Nova Emenda';
+  $('moB').innerHTML = '<div class="sep">📋 Identificação</div><div class="g g2"><div class="fld"><label>Código</label><input id="f_cod" value="' + (e.codigo || '') + '"></div><div class="fld"><label>Natureza</label><select id="f_nat"><option value="">Selecione...</option><option' + (e.natureza === 'Consumo' ? ' selected' : '') + '>Consumo</option><option' + (e.natureza === 'Permanente' ? ' selected' : '') + '>Permanente</option><option' + (e.natureza === 'Misto' ? ' selected' : '') + '>Misto</option></select></div></div>' +
+    '<div class="fld" style="margin-top:10px"><label>Descrição</label><textarea id="f_desc" rows="2">' + (e.descricao || '') + '</textarea></div>' +
+    '<div class="g g2" style="margin-top:10px"><div class="fld"><label>Instrumento</label>' + mkSel('cad_instrumento', 'f_inst', e.instrumento, 'Selecione...') + '</div><div class="fld"><label>Nº Termo</label><input id="f_nt" value="' + (e.numTermo || '') + '"></div></div>' +
+    '<div class="g g3" style="margin-top:10px"><div class="fld"><label>Ação Orçam.</label>' + mkSel('cad_acao', 'f_ac', e.acao, 'Selecione...') + '</div><div class="fld"><label>Modalidade</label>' + mkSel('cad_modalidade', 'f_mo', e.modalidade, 'Selecione...') + '</div><div class="fld"><label>GND</label>' + mkSel('cad_gnd', 'f_gn', e.gnd, 'Selecione...') + '</div></div>' +
+    '<div class="sep" style="margin-top:22px">👤 Origem</div><div class="g g2"><div class="fld"><label>Parlamentar</label><input id="f_pa" value="' + (e.parlamentar || '') + '"></div><div class="fld"><label>Partido / Esfera</label><input id="f_pt" value="' + (e.partido || '') + '"></div></div><div class="g g2" style="margin-top:10px"><div class="fld"><label>Órgão Concedente</label><input id="f_og" value="' + (e.orgao || '') + '"></div><div class="fld"><label>Nº Portaria</label><input id="f_po" value="' + (e.portaria || '') + '"></div></div>' +
+    '<div class="sep" style="margin-top:22px">💰 Valores e Vigência</div><div class="g g3"><div class="fld"><label>Valor Total</label><input id="f_vl" value="' + (e.valor ? (e.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + '" placeholder="0,00"></div><div class="fld"><label>Início</label><input id="f_vi" type="date" value="' + (e.vigenciaIni || '') + '"></div><div class="fld"><label>Fim</label><input id="f_vf" type="date" value="' + (e.vigenciaFim || '') + '"></div></div>' +
+    '<div class="sep" style="margin-top:22px">🏦 Dados Bancários</div><div class="g g4"><div class="fld"><label>Banco</label><input id="f_bc" value="' + (e.banco || '') + '"></div><div class="fld"><label>Agência</label><input id="f_ag" value="' + (e.agencia || '') + '"></div><div class="fld"><label>Conta</label><input id="f_cc" value="' + (e.conta || '') + '"></div><div class="fld"><label>PIX</label><input id="f_px" value="' + (e.pix || '') + '"></div></div>' +
+    '<div class="sep" style="margin-top:22px">👥 Responsáveis</div>' +
+    (function () {
+      const rps = DB.all('responsaveis'), sl = e.responsaveis || [];
+      if (!rps.length) return '<div style="padding:14px;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--tx3);font-size:.82rem">Nenhum responsável cadastrado. <a onclick="closeMo();cadTab=\'resp\';go(\'cad\')">Cadastrar →</a></div>';
+      return '<div id="f_resps" style="display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto;padding:6px;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r)">' + rps.map(r => '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:.82rem;text-transform:none;letter-spacing:0;font-weight:500"><input type="checkbox" class="ckResp" value="' + r.id + '" ' + (sl.includes(r.id) ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:var(--gold)"><div><div style="font-weight:600;color:var(--tx)">' + r.nome + '</div><div style="font-size:.7rem;color:var(--tx3)">' + (r.cargo || '—') + ' · ' + (r.cpf || '') + '</div></div></label>').join('') + '</div>'
+    })() + '<div class="fld" style="margin-top:10px"><label>Observações</label><textarea id="f_ob" rows="2">' + (e.obs || '') + '</textarea></div>';
+  maskM($('f_vl'));
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="saveE(\'' + (id || '') + '\')">Salvar</button>';
+  openMo();
+}
+
+function saveE(id) {
+  const selResps = [...document.querySelectorAll('.ckResp:checked')].map(c => c.value);
+  const d = { id: id || uid(), codigo: $('f_cod').value, descricao: $('f_desc').value, natureza: $('f_nat').value, instrumento: $('f_inst').value, numTermo: $('f_nt').value, acao: $('f_ac').value, modalidade: $('f_mo').value, gnd: $('f_gn').value, parlamentar: $('f_pa').value, partido: $('f_pt').value, orgao: $('f_og').value, portaria: $('f_po').value, valor: F.N($('f_vl').value), vigenciaIni: $('f_vi').value, vigenciaFim: $('f_vf').value, banco: $('f_bc').value, agencia: $('f_ag').value, conta: $('f_cc').value, pix: $('f_px').value, responsaveis: selResps, obs: $('f_ob').value, status: DB.one('emendas', id)?.status || 'ativa' };
+  if (!d.descricao) { alert('Preencha a descrição.'); return; }
+  DB.ups('emendas', d); DB.log('emenda', d.codigo + ' — ' + d.descricao); closeMo(); go(curV);
+}
+
+function delE(id) {
+  const e = DB.one('emendas', id);
+  if (!e || !confirm('Excluir "' + e.descricao + '"?')) return;
+  DB.del('emendas', id);
+  ['rubricas', 'planos', 'comprometidos', 'pagamentos', 'creditos', 'remanejos'].forEach(ns => DB.sv(ns, DB.all(ns).filter(x => x.emendaId !== id)));
+  DB.log('excluida', e.codigo); go(curV);
+}
+
+function showED(id) {
+  const e = DB.one('emendas', id); if (!e) return;
+  const s = calcES(e), p = Math.min(s.pct, 100), pp = s.prev > 0 ? s.gasto / s.prev * 100 : 0, ep = s.prev > 0 ? s.emp / s.prev * 100 : 0, cp = s.prev > 0 ? s.comp / s.prev * 100 : 0;
+  $('moT').textContent = e.descricao || 'Detalhes';
+  $('moB').innerHTML = '<div class="g g4" style="margin-bottom:16px"><div class="kpi" style="padding:12px;cursor:default"><div class="kpi-lb">Previsto</div><div class="kpi-vl" style="font-size:1.1rem">' + F.R(s.prev) + '</div></div><div class="kpi" style="padding:12px;cursor:default"><div class="kpi-lb">Pago</div><div class="kpi-vl" style="font-size:1.1rem;color:var(--green)">' + F.R(s.gasto) + '</div></div><div class="kpi" style="padding:12px;cursor:default"><div class="kpi-lb">Reservado</div><div class="kpi-vl" style="font-size:1.1rem;color:var(--blue)">' + F.R(s.comp + s.emp) + '</div></div><div class="kpi" style="padding:12px;cursor:default"><div class="kpi-lb">Disponível</div><div class="kpi-vl" style="font-size:1.1rem;color:var(--green)">' + F.R(s.disp) + '</div></div></div>' +
+    '<div class="saldo-layers" style="height:14px;margin-bottom:4px"><div class="sl-pago" style="width:' + pp + '%"></div><div class="sl-emp" style="width:' + ep + '%"></div><div class="sl-comp" style="width:' + cp + '%"></div></div>' +
+    '<div style="display:flex;justify-content:center;gap:12px;font-size:.68rem;color:var(--tx3);margin-bottom:16px"><span>🟢 Pago ' + F.P(pp) + '</span><span>🔵 Emp ' + F.P(ep) + '</span><span>🟡 Comp ' + F.P(cp) + '</span></div>' +
+    '<div class="tbl-w"><table class="tbl"><tbody><tr><td><strong>Código</strong></td><td>' + (e.codigo || '—') + '</td><td><strong>Natureza</strong></td><td><span class="badge b-blue">' + (e.natureza || '—') + '</span></td></tr><tr><td><strong>Parlamentar</strong></td><td>' + (e.parlamentar || '—') + ' (' + (e.partido || '—') + ')</td><td><strong>Órgão</strong></td><td>' + (e.orgao || '—') + '</td></tr><tr><td><strong>Vigência</strong></td><td>' + F.D(e.vigenciaIni) + ' a ' + F.D(e.vigenciaFim) + '</td><td><strong>Dias</strong></td><td>' + (F.DL(e.vigenciaFim) > 0 ? F.DL(e.vigenciaFim) + ' dias' : 'Vencida') + '</td></tr></tbody></table></div>' +
+    '<div style="margin-top:14px"><strong style="font-size:.84rem">Rubricas:</strong></div>' +
+    (s.rubs.length === 0 ? '<div style="color:var(--tx3);font-size:.8rem;margin-top:6px">Nenhuma. <a onclick="closeMo();go(\'planos\')">Cadastrar →</a></div>' :
+      s.rubs.map(r => { const rs = calcRS(r.id), rd = (r.valor || 0) - rs.comp - rs.emp - rs.pago; return '<div class="rr"><div class="rr-info"><div class="rr-name">' + r.descricao + ' <span class="badge b-blue">' + tipoNome(r.tipo) + '</span></div><div class="rr-vals"><span>Previsto<strong>' + F.R(r.valor) + '</strong></span><span>Pago<strong>' + F.R(rs.pago) + '</strong></span><span>Disp.<strong style="color:' + (rd <= 0 ? 'var(--red)' : 'var(--green)') + '">' + F.R(rd) + '</strong></span></div></div></div>' }).join(''));
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button><button class="btn btn-p" onclick="closeMo();openEF(\'' + id + '\')">Editar</button>'; openMo();
+}
+
+function rPlanos(c) {
+  const ems = DB.all('emendas');
+  if (!ems.length) { c.innerHTML = '<div class="empty"><div class="empty-t">Cadastre uma emenda primeiro.</div></div>'; return; }
+  const si = localStorage.getItem('ibea_sel') || ems[0].id, sel = DB.one('emendas', si) || ems[0];
+  c.innerHTML = '<div class="bc"><a onclick="go(\'dash\')">Dashboard</a> › Plano de Trabalho</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap"><label style="margin:0;font-size:.8rem">Emenda:</label><select onchange="localStorage.setItem(\'ibea_sel\',this.value);go(\'planos\')" style="width:auto;min-width:300px">' + ems.map(e => '<option value="' + e.id + '"' + (e.id === sel.id ? ' selected' : '') + '>' + (e.codigo || '—') + ' — ' + (e.descricao || '').slice(0, 45) + '</option>').join('') + '</select></div>' +
+    '<div class="tabs"><div class="tab act" onclick="swT(this,\'tM\')">Metas</div><div class="tab" onclick="swT(this,\'tR\')">Rubricas</div><div class="tab" onclick="swT(this,\'tRm\')">Remanejamento</div></div>' +
+    '<div class="tp act" id="tM">' + rMetas(sel) + '</div><div class="tp" id="tR">' + rRubs(sel) + '</div><div class="tp" id="tRm">' + rRem(sel) + '</div>';
+}
+
+function swT(el, pid) {
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('act')); el.classList.add('act');
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('act')); $(pid).classList.add('act');
+}
+
+function rMetas(em) {
+  const pl = DB.one('planos', em.id) || {};
+  return '<div class="sep">🎯 Metas</div><div class="fld"><label>Metas</label><textarea id="fm_m" rows="4">' + (pl.metas || '') + '</textarea></div><div class="fld" style="margin-top:10px"><label>Cronograma</label><textarea id="fm_c" rows="3">' + (pl.cronograma || '') + '</textarea></div><div class="fld" style="margin-top:10px"><label>Indicadores</label><textarea id="fm_i" rows="3">' + (pl.indicadores || '') + '</textarea></div><div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="btn btn-p" onclick="svM(\'' + em.id + '\')">Salvar Metas</button></div>';
+}
+function svM(eid) { DB.ups('planos', { id: eid, emendaId: eid, metas: $('fm_m').value, cronograma: $('fm_c').value, indicadores: $('fm_i').value }); DB.log('plano', eid); alert('✅ Metas salvas!'); }
+
+function rRubs(em) {
+  const rubs = DB.all('rubricas').filter(r => r.emendaId === em.id), tp = rubs.reduce((s, r) => s + (r.valor || 0), 0), df = (em.valor || 0) - tp;
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div class="sep" style="margin:0;border:none;padding:0">📦 Rubricas</div><button class="btn btn-p btn-sm" onclick="openRF(\'' + em.id + '\')">+ Nova Rubrica</button></div>' +
+    '<div class="kpi-g" style="grid-template-columns:repeat(3,1fr)"><div class="kpi" style="cursor:default"><div class="kpi-lb">Emenda</div><div class="kpi-vl" style="font-size:1.05rem">' + F.R(em.valor) + '</div></div><div class="kpi" style="cursor:default"><div class="kpi-lb">Rubricas</div><div class="kpi-vl" style="font-size:1.05rem">' + F.R(tp) + '</div></div><div class="kpi" style="cursor:default"><div class="kpi-lb">Diferença</div><div class="kpi-vl" style="font-size:1.05rem;color:' + (df < 0 ? 'var(--red)' : df > 0 ? 'var(--yellow)' : 'var(--green)') + '">' + F.R(df) + '</div></div></div>' +
+    (rubs.length === 0 ? '<div class="empty" style="padding:24px"><div class="empty-t">Nenhuma rubrica.</div></div>' :
+      rubs.map(r => {
+        const rs = calcRS(r.id), rd = (r.valor || 0) - rs.comp - rs.emp - rs.pago, pp = r.valor > 0 ? rs.pago / r.valor * 100 : 0, ep = r.valor > 0 ? rs.emp / r.valor * 100 : 0, cp = r.valor > 0 ? rs.comp / r.valor * 100 : 0;
+        return '<div class="rr"><div class="rr-info"><div class="rr-name">' + r.descricao + ' <span class="badge b-blue">' + tipoNome(r.tipo) + '</span></div><div class="rr-vals"><span>Previsto<strong>' + F.R(r.valor) + '</strong></span><span>Pago<strong>' + F.R(rs.pago) + '</strong></span><span>Disp.<strong style="color:' + (rd <= 0 ? 'var(--red)' : 'var(--green)') + '">' + F.R(rd) + '</strong></span></div><div class="saldo-layers" style="width:100%;margin-top:6px"><div class="sl-pago" style="width:' + pp + '%"></div><div class="sl-emp" style="width:' + ep + '%"></div><div class="sl-comp" style="width:' + cp + '%"></div></div></div><div class="row-acts"><button class="btn-i" onclick="openRF(\'' + em.id + '\',\'' + r.id + '\')">✏️</button><button class="btn-i" onclick="delR(\'' + r.id + '\')">🗑️</button></div></div>'
+      }).join(''));
+}
+
+function openRF(eid, rid) {
+  const r = rid ? DB.one('rubricas', rid) : {}; $('moT').textContent = rid ? 'Editar Rubrica' : 'Nova Rubrica';
+  $('moB').innerHTML = '<div class="fld"><label>Descrição</label><input id="fr_d" value="' + (r.descricao || '') + '"></div><div class="g g3" style="margin-top:10px"><div class="fld"><label>Tipo</label>' + mkSel('cad_tipo_rubrica', 'fr_t', r.tipo, 'Selecione...') + '</div><div class="fld"><label>Valor (R$)</label><input id="fr_v" value="' + (r.valor ? (r.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + '" placeholder="0,00"></div><div class="fld"><label>Código</label><input id="fr_c" value="' + (r.codigo || '') + '"></div></div><div class="fld" style="margin-top:10px"><label>Observações</label><textarea id="fr_o" rows="2">' + (r.obs || '') + '</textarea></div>';
+  maskM($('fr_v')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="svR(\'' + eid + '\',\'' + (rid || '') + '\')">Salvar</button>'; openMo();
+}
+function svR(eid, rid) { const d = $('fr_d').value; if (!d) { alert('Preencha a descrição.'); return; } DB.ups('rubricas', { id: rid || uid(), emendaId: eid, descricao: d, tipo: $('fr_t').value, valor: F.N($('fr_v').value), codigo: $('fr_c').value, obs: $('fr_o').value }); DB.log('rubrica', d); closeMo(); go('planos'); }
+function delR(id) { const r = DB.one('rubricas', id); if (!r || !confirm('Excluir "' + r.descricao + '"?')) return; DB.del('rubricas', id); go('planos'); }
+
+function rRem(em) {
+  const rubs = DB.all('rubricas').filter(r => r.emendaId === em.id), rems = DB.all('remanejos').filter(r => r.emendaId === em.id);
+  if (rubs.length < 2) return '<div class="empty" style="padding:24px"><div class="empty-t">Cadastre pelo menos 2 rubricas.</div></div>';
+  const opts = rubs.map(r => { const rs = calcRS(r.id), d = (r.valor || 0) - rs.comp - rs.emp - rs.pago; return '<option value="' + r.id + '">' + r.descricao + ' (Disp: ' + F.R(d) + ')</option>' }).join('');
+  return '<div class="sep">🔄 Remanejamento</div><div style="background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:18px"><div class="g g3"><div class="fld"><label>De</label><select id="rm_d">' + opts + '</select></div><div class="fld"><label>Para</label><select id="rm_p">' + opts + '</select></div><div class="fld"><label>Valor (R$)</label><input id="rm_v" placeholder="0,00"></div></div><div class="fld" style="margin-top:10px"><label>Justificativa</label><textarea id="rm_j" rows="2"></textarea></div><div style="margin-top:10px;display:flex;justify-content:flex-end"><button class="btn btn-p" onclick="svRem(\'' + em.id + '\')">Confirmar</button></div></div>' +
+    (rems.length ? '<div class="sep">📋 Histórico</div><div class="tbl-w"><table class="tbl"><thead><tr><th>Data</th><th>De</th><th>Para</th><th>Valor</th></tr></thead><tbody>' + rems.map(rm => '<tr><td>' + F.D((rm._c || '').split('T')[0]) + '</td><td>' + (DB.one('rubricas', rm.de)?.descricao || '—') + '</td><td>' + (DB.one('rubricas', rm.para)?.descricao || '—') + '</td><td class="mono">' + F.R(rm.valor) + '</td></tr>').join('') + '</tbody></table></div>' : '');
+}
+function svRem(eid) {
+  const de = $('rm_d').value, pa = $('rm_p').value, vl = F.N($('rm_v').value), j = $('rm_j').value;
+  if (de === pa) { alert('Origem e destino diferentes.'); return; } if (vl <= 0) { alert('Valor > 0.'); return; } if (!j.trim()) { alert('Justificativa obrigatória.'); return; }
+  const rd = DB.one('rubricas', de), rp = DB.one('rubricas', pa); if (!rd || !rp) return;
+  const rs = calcRS(de), d = (rd.valor || 0) - rs.comp - rs.emp - rs.pago; if (vl > d) { alert('Insuficiente. Disp: ' + F.R(d)); return; }
+  rd.valor -= vl; rp.valor += vl; DB.ups('rubricas', rd); DB.ups('rubricas', rp); DB.ups('remanejos', { id: uid(), emendaId: eid, de, para: pa, valor: vl, just: j }); DB.log('remanejamento', F.R(vl)); alert('✅ Remanejamento OK!'); go('planos');
+}
+
+/* ════════════════ MÓDULO COMPRAS ════════════════ */
+
+/* STATUS HELPERS */
+const ST = {
+  cotacao: { aguardando: 'Aguardando Orçamentos', completa: 'Orçamentos Recebidos', decidida: 'Vencedor Definido', nf_pendente: 'Aguardando NF', nf_registrada: 'NF Registrada', paga: 'Paga', cancelada: 'Cancelada' },
+  consumo: { nf_registrada: 'NF Registrada', paga: 'Paga', cancelada: 'Cancelada' }
+};
+function stBadge(st) {
+  const m = { aguardando: 'b-yellow', completa: 'b-orange', decidida: 'b-blue', nf_pendente: 'b-purple', nf_registrada: 'b-green', paga: 'b-green', cancelada: 'b-gray' };
+  return '<span class="badge ' + (m[st] || 'b-gray') + '" title="' + (ST.cotacao[st] || st) + '">' + (ST.cotacao[st] || st) + '</span>';
+}
+
+/* ═══════════════ COMPRAS (OVERVIEW) ═══════════════ */
+function rCompras(c) {
+  const cots = DB.all('cotacoes'); const nfs = DB.all('notas_fiscais');
+  const totalCots = cots.length; const totalNFs = nfs.length;
+  const totalValNF = nfs.reduce((s, n) => s + (n.valor || 0), 0);
+  const pendentes = cots.filter(x => x.status === 'aguardando' || x.status === 'completa').length;
+  const nfPend = nfs.filter(x => x.status === 'nf_registrada').length;
+
+  const all = [...cots.map(x => ({ ...x, _tipo: 'cotacao', _data: x._c })), ...nfs.filter(x => !x.cotacaoId).map(x => ({ ...x, _tipo: 'consumo', _data: x._c }))];
+  all.sort((a, b) => (b._data || '').localeCompare(a._data || ''));
+  let fl = all;
+  if (cSearch) { const q = cSearch.toLowerCase(); fl = fl.filter(x => (x.descricao || '').toLowerCase().includes(q) || (x.fornecedor || '').toLowerCase().includes(q)) }
+  if (cEmFilt) fl = fl.filter(x => x.emendaId === cEmFilt);
+  if (cFilter === 'perm') fl = fl.filter(x => x._tipo === 'cotacao');
+  if (cFilter === 'cons') fl = fl.filter(x => x._tipo === 'consumo');
+  if (cFilter === 'pend') fl = fl.filter(x => ['aguardando', 'completa', 'nf_pendente', 'nf_registrada'].includes(x.status));
+
+  const ems = DB.all('emendas');
+  c.innerHTML = '<div class="kpi-g">' +
+    '<div class="kpi ' + (cFilter === 'perm' ? 'kact' : '') + '" onclick="cFilter=cFilter===\'perm\'?null:\'perm\';go(\'compras\')" title="Compras com cotação (material permanente)"><div class="kpi-ic" style="background:var(--blue-bg);color:var(--blue)">📦</div><div class="kpi-lb">Cotações</div><div class="kpi-vl">' + totalCots + '</div><div class="kpi-sb">material permanente</div></div>' +
+    '<div class="kpi ' + (cFilter === 'cons' ? 'kact' : '') + '" onclick="cFilter=cFilter===\'cons\'?null:\'cons\';go(\'compras\')" title="Despesas de consumo diretas (sem cotação)"><div class="kpi-ic" style="background:var(--green-bg);color:var(--green)">🧾</div><div class="kpi-lb">Despesas Consumo</div><div class="kpi-vl">' + nfs.filter(x => !x.cotacaoId).length + '</div></div>' +
+    '<div class="kpi ' + (cFilter === 'pend' ? 'kact' : '') + '" onclick="cFilter=cFilter===\'pend\'?null:\'pend\';go(\'compras\')" title="Itens pendentes de ação"><div class="kpi-ic" style="background:var(--yellow-bg);color:var(--yellow)">⏳</div><div class="kpi-lb">Pendentes</div><div class="kpi-vl">' + (pendentes + nfPend) + '</div></div>' +
+    '<div class="kpi" style="cursor:default" title="Valor total em notas fiscais registradas"><div class="kpi-ic" style="background:var(--gold-bg);color:var(--gold)">💰</div><div class="kpi-lb">Total em NFs</div><div class="kpi-vl">' + F.R(totalValNF) + '</div></div></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div class="tbl-filter">' +
+    '<input placeholder="🔍 Pesquisar..." value="' + cSearch + '" oninput="cSearch=this.value;go(\'compras\')" style="min-width:200px" title="Filtrar por descrição ou fornecedor">' +
+    '<select onchange="cEmFilt=this.value;go(\'compras\')" title="Filtrar por emenda"><option value="">Todas emendas</option>' + ems.map(e => '<option value="' + e.id + '"' + (cEmFilt === e.id ? ' selected' : '') + '>' + (e.codigo || '—') + ' — ' + (e.descricao || '').slice(0, 30) + '</option>').join('') + '</select></div>' +
+    '<div style="display:flex;gap:6px"><button class="btn btn-p" onclick="openNewCot()" title="Nova cotação para material permanente (exige 3 orçamentos)">+ Cotação</button><button class="btn btn-s" onclick="openNewConsumo()" title="Nova despesa de consumo (direto para NF)">+ Consumo</button></div></div>' +
+    (fl.length === 0 ? '<div class="empty"><div class="empty-ic">🛒</div><div class="empty-t">Nenhuma compra registrada.</div></div>' :
+      '<div class="tbl-w"><table class="tbl"><thead><tr><th title="Data de criação">Data</th><th title="Tipo da despesa">Tipo</th><th title="Emenda vinculada">Emenda</th><th title="Rubrica">Rubrica</th><th title="Descrição dos itens">Descrição</th><th title="Valor total">Valor</th><th title="Situação atual">Status</th><th>Ações</th></tr></thead><tbody>' +
+      fl.map(x => { const rub = DB.one('rubricas', x.rubricaId); const tn = rub ? tipoNome(rub.tipo) : (x._tipo === 'cotacao' ? 'Permanente' : 'Consumo'); return '<tr><td>' + F.D((x._c || '').slice(0, 10)) + '</td><td><span class="badge ' + (x._tipo === 'cotacao' ? 'b-blue' : 'b-green') + '" title="' + tn + '">' + tn + '</span></td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis" title="' + emNome(x.emendaId) + '">' + emNome(x.emendaId) + '</td><td title="' + rubNome(x.rubricaId) + '">' + rubNome(x.rubricaId).slice(0, 20) + '</td><td title="' + (x.descricao || '') + '">' + ((x.descricao || '—').slice(0, 35)) + '</td><td class="mono">' + F.R(x.valor || x.valorTotal || 0) + '</td><td>' + stBadge(x.status) + '</td><td><div class="row-acts"><button class="btn-i" onclick="' + (x._tipo === 'cotacao' ? 'showCot' : 'showNFDetail') + '(\'' + x.id + '\')" title="Ver detalhes">👁️</button></div></td></tr>' }).join('') + '</tbody></table></div>');
+}
+
+/* ═══════════════ COTAÇÕES ═══════════════ */
+function rCotacoes(c) {
+  const cots = DB.all('cotacoes');
+  c.innerHTML = '<div class="bc"><a onclick="go(\'compras\')">Compras</a> › Cotações</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 style="font-size:.92rem">Cotações para Material Permanente</h3><button class="btn btn-p" onclick="openNewCot()" title="Criar nova solicitação de cotação com 3 orçamentos">+ Nova Cotação</button></div>' +
+    (cots.length === 0 ? '<div class="empty"><div class="empty-ic">📋</div><div class="empty-t">Nenhuma cotação.</div></div>' :
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">' + cots.map(ct => {
+        const orcs = DB.all('orcamentos').filter(o => o.cotacaoId === ct.id);
+        return '<div class="cc" onclick="showCot(\'' + ct.id + '\')" title="Clique para gerenciar esta cotação"><div class="cc-h"><div class="cc-tt">' + ct.descricao + '</div>' + stBadge(ct.status) + '</div>' +
+          '<div class="cc-info"><span title="Emenda">📋 ' + emNome(ct.emendaId) + '</span><span title="Rubrica">📦 ' + rubNome(ct.rubricaId).slice(0, 20) + '</span><span title="Orçamentos recebidos">📊 ' + orcs.length + '/3 orç.</span></div>' +
+          '<div style="font-size:.82rem;font-weight:700" title="Valor estimado">' + F.R(ct.valorTotal) + '</div></div>'
+      }).join('') + '</div>');
+}
+
+/* ═══════════════ NEW COTAÇÃO ═══════════════ */
+function openNewCot(id) {
+  const ct = id ? DB.one('cotacoes', id) : {};
+  const ems = DB.all('emendas').filter(e => e.status !== 'encerrada');
+  if (!ems.length) { alert('Cadastre uma emenda primeiro.'); return }
+  const emOpts = ems.map(e => '<option value="' + e.id + '"' + (e.id === ct.emendaId ? ' selected' : '') + '>' + (e.codigo || '—') + ' — ' + (e.descricao || '').slice(0, 40) + '</option>').join('');
+  $('moT').textContent = id ? 'Editar Cotação' : 'Nova Cotação — Material Permanente';
+  $('moB').innerHTML = '<div class="al al-i" title="Material permanente exige no mínimo 3 orçamentos e fotos do bem adquirido">ℹ️ Cotações são obrigatórias para material permanente. Mínimo 3 orçamentos.</div>' +
+    '<div class="sep">📋 Dados da Cotação</div>' +
+    '<div class="g g2"><div class="fld"><label title="Emenda vinculada a esta compra">Emenda</label><select id="ct_em" title="Selecione a emenda">' + emOpts + '</select></div>' +
+    '<div class="fld"><label title="Rubrica que será debitada">Rubrica</label><select id="ct_rub" title="Selecione a rubrica"></select></div></div>' +
+    '<div class="fld" style="margin-top:10px"><label title="Descrição dos itens a serem comprados">Descrição dos Itens</label><textarea id="ct_desc" rows="3" placeholder="Ex: 2 aparelhos de ultrassom portátil, 1 desfibrilador..." title="Descreva todos os itens que precisa comprar">' + (ct.descricao || '') + '</textarea></div>' +
+    '<div class="g g2" style="margin-top:10px"><div class="fld"><label title="Valor estimado total da compra">Valor Estimado (R$)</label><input id="ct_val" value="' + (ct.valorTotal ? (ct.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + '" placeholder="0,00" title="Estimativa para verificar saldo disponível"></div>' +
+    '<div class="fld"><label title="Prazo para os fornecedores enviarem orçamentos">Prazo p/ Orçamentos</label><input id="ct_prazo" type="date" value="' + (ct.prazo || '') + '" title="Data limite para receber orçamentos"></div></div>' +
+    '<div class="fld" style="margin-top:10px"><label title="Observações adicionais">Observações</label><textarea id="ct_obs" rows="2" title="Notas ou especificações técnicas">' + (ct.obs || '') + '</textarea></div>';
+  maskM($('ct_val'));
+  // Bind emenda change -> reload rubricas
+  $('ct_em').addEventListener('change', function () { loadRubsSel(this.value, 'ct_rub', 'MP') });
+  // Load rubricas for initial selected emenda
+  const _initEm = $('ct_em').value;
+  if (_initEm) loadRubsSel(_initEm, 'ct_rub', 'MP', ct.rubricaId);
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="saveCot(\'' + (id || '') + '\')">Salvar</button>';
+  openMo();
+}
+
+function loadRubsSel(emId, selId, tipoSugerido, selVal) {
+  const rubs = DB.all('rubricas').filter(r => r.emendaId === emId);
+  const el = $(selId); if (!el) return;
+  el.innerHTML = '<option value="">Selecione a rubrica...</option>' + rubs.map(r => { const d = rubDisp(r.id); const tn = tipoNome(r.tipo); const match = (!tipoSugerido || r.tipo === tipoSugerido); return '<option value="' + r.id + '"' + (r.id === selVal ? ' selected' : '') + ' title="Tipo: ' + tn + ' · Disponível: ' + F.R(d) + (match ? '' : ' · ⚠️ Tipo diferente do sugerido') + '">' + r.descricao + ' [' + tn + '] (Disp: ' + F.R(d) + ')' + (match ? '' : ' ⚠️') + '</option>' }).join('');
+}
+
+function saveCot(id) {
+  const emId = $('ct_em').value, rubId = $('ct_rub').value, desc = $('ct_desc').value, val = F.N($('ct_val').value);
+  if (!emId || !rubId) { alert('Selecione emenda e rubrica.'); return }
+  if (!desc) { alert('Descreva os itens.'); return }
+  if (val <= 0) { alert('Informe o valor estimado.'); return }
+  // Check saldo
+  const disp = rubDisp(rubId);
+  if (val > disp && !id) { alert('Valor excede o saldo disponível da rubrica (' + F.R(disp) + '). Reduza o valor ou faça um remanejamento.'); return }
+  const data = { id: id || uid(), emendaId: emId, rubricaId: rubId, descricao: desc, valorTotal: val, prazo: $('ct_prazo').value, obs: $('ct_obs').value, status: id ? (DB.one('cotacoes', id)?.status || 'aguardando') : 'aguardando', tipo: 'permanente' };
+  DB.ups('cotacoes', data);
+  // Comprometer saldo se novo
+  if (!id) { DB.ups('comprometidos', { id: uid(), emendaId: emId, rubricaId: rubId, cotacaoId: data.id, valor: val, status: 'comprometido' }); DB.log('saldo_comprometido', F.R(val) + ' na rubrica ' + rubNome(rubId)) }
+  DB.log('cotacao_salva', desc); closeMo(); go(curV);
+}
+
+/* ═══════════════ SHOW COTAÇÃO DETAIL ═══════════════ */
+function showCot(id) {
+  const ct = DB.one('cotacoes', id); if (!ct) return;
+  const orcs = DB.all('orcamentos').filter(o => o.cotacaoId === id);
+  const nf = DB.all('notas_fiscais').find(n => n.cotacaoId === id);
+  const steps = [
+    { k: 'aguardando', l: '1. Orçamentos', done: orcs.length >= 3 || ['completa', 'decidida', 'nf_pendente', 'nf_registrada', 'paga'].includes(ct.status) },
+    { k: 'completa', l: '2. Mapa Comparativo', done: ['decidida', 'nf_pendente', 'nf_registrada', 'paga'].includes(ct.status) },
+    { k: 'decidida', l: '3. Vencedor', done: ['nf_pendente', 'nf_registrada', 'paga'].includes(ct.status) },
+    { k: 'nf_registrada', l: '4. Nota Fiscal', done: ['nf_registrada', 'paga'].includes(ct.status) },
+    { k: 'paga', l: '5. Pago', done: ct.status === 'paga' }
+  ];
+  const curStep = steps.findIndex(s => !s.done);
+
+  $('moT').textContent = 'Cotação: ' + ct.descricao.slice(0, 40);
+  $('moB').innerHTML = '<div class="steps">' + steps.map((s, i) => '<div class="step ' + (s.done ? 'done' : i === curStep ? 'cur' : 'pend') + '" title="' + s.l + '">' + (s.done ? '✅' : '⬜') + ' ' + s.l + '</div>').join('') + '</div>' +
+    '<div class="g g3" style="margin-bottom:16px"><div class="kpi" style="padding:12px;cursor:default" title="Emenda"><div class="kpi-lb">Emenda</div><div class="kpi-vl" style="font-size:.85rem">' + emNome(ct.emendaId) + '</div></div><div class="kpi" style="padding:12px;cursor:default" title="Rubrica"><div class="kpi-lb">Rubrica</div><div class="kpi-vl" style="font-size:.85rem">' + rubNome(ct.rubricaId).slice(0, 25) + '</div></div><div class="kpi" style="padding:12px;cursor:default" title="Valor estimado"><div class="kpi-lb">Valor Est.</div><div class="kpi-vl" style="font-size:1rem">' + F.R(ct.valorTotal) + '</div></div></div>' +
+    (ct.obs ? '<div style="font-size:.8rem;color:var(--tx2);margin-bottom:14px;padding:8px 12px;background:var(--card2);border-radius:var(--r-sm)" title="Observações">📝 ' + ct.obs + '</div>' : '') +
+    // ORÇAMENTOS
+    '<div class="sep">📊 Orçamentos Recebidos (' + orcs.length + '/3)</div>' +
+    (orcs.length > 0 ? orcs.map((o, i) => '<div class="mc-card ' + (o.vencedor ? 'mc-win' : '') + '" title="' + (o.vencedor ? '✅ VENCEDOR — ' : '') + 'Orçamento de ' + o.empresa + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="mc-name">' + (i + 1) + '. ' + o.empresa + (o.vencedor ? ' ✅ VENCEDOR' : '') + '</div><div class="mc-cnpj">CNPJ: ' + (o.cnpj || '—') + ' · Validade: ' + F.D(o.validade) + '</div></div><div class="mc-val">' + F.R(o.valor) + '</div></div></div>').join('') : '<div style="color:var(--tx3);font-size:.82rem;margin-bottom:8px">Nenhum orçamento registrado ainda.</div>') +
+    '<button class="btn btn-s btn-sm" onclick="openAddOrc(\'' + id + '\')" title="Registrar orçamento de um fornecedor" style="margin-bottom:16px">+ Registrar Orçamento</button>' +
+    // VENCEDOR
+    (orcs.length >= 3 && !orcs.some(o => o.vencedor) ? '<div class="al al-i" title="Selecione o vencedor">📌 3+ orçamentos recebidos. <a onclick="closeMo();openMapaComp(\'' + id + '\')"><strong>Abrir Mapa Comparativo →</strong></a></div>' : '') +
+    (orcs.some(o => o.vencedor) && !nf ? '<div class="al al-s">✅ Vencedor definido. <a onclick="closeMo();openRegNF(\'' + id + '\')"><strong>Registrar Nota Fiscal →</strong></a></div>' : '') +
+    (nf ? '<div class="sep">🧾 Nota Fiscal</div><div class="tbl-w"><table class="tbl"><tbody><tr><td><strong>Nº NF</strong></td><td>' + nf.numNF + '</td><td><strong>Data</strong></td><td>' + F.D(nf.dataNF) + '</td></tr><tr><td><strong>Fornecedor</strong></td><td>' + nf.fornecedor + '</td><td><strong>CNPJ</strong></td><td>' + nf.cnpj + '</td></tr><tr><td><strong>Valor</strong></td><td class="mono">' + F.R(nf.valor) + '</td><td><strong>Status</strong></td><td>' + stBadge(nf.status) + '</td></tr></tbody></table></div>' +
+      (nf.fotos && nf.fotos.length ? '<div class="sep" style="margin-top:14px">📸 Fotos do Bem (' + nf.fotos.length + ')</div><div class="foto-grid">' + nf.fotos.map(f => '<div class="foto-item" title="' + (f.legenda || 'Foto') + '"><img src="' + f.data + '" alt="' + (f.legenda || '') + '"></div>').join('') + '</div>' : '') : '');
+
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button>' + (ct.status === 'aguardando' ? '<button class="btn btn-i" onclick="closeMo();openNewCot(\'' + id + '\')" title="Editar">✏️</button>' : '');
+  openMo();
+}
+
+/* ═══════════════ ADD ORÇAMENTO ═══════════════ */
+function openAddOrc(cotId) {
+  $('moT').textContent = 'Registrar Orçamento';
+  $('moB').innerHTML = '<div class="sep">🏢 Dados do Fornecedor</div>' +
+    '<div class="g g2"><div class="fld"><label>Empresa (Razão Social)</label><input id="or_emp" title="Razão social do fornecedor"></div><div class="fld"><label>CNPJ</label><input id="or_cnpj" title="CNPJ do fornecedor"></div></div>' +
+    '<div class="g g3" style="margin-top:10px"><div class="fld"><label>Telefone</label><input id="or_tel" title="Telefone de contato"></div><div class="fld"><label>E-mail</label><input id="or_email" title="E-mail do fornecedor"></div><div class="fld"><label>Validade do Orçamento</label><input id="or_val_dt" type="date" title="Até quando vale este orçamento"></div></div>' +
+    '<div class="sep" style="margin-top:14px">💰 Valor</div>' +
+    '<div class="g g2"><div class="fld"><label title="Valor total do orçamento">Valor Total (R$)</label><input id="or_val" placeholder="0,00" title="Valor total ofertado"></div><div class="fld"><label>Observações</label><input id="or_obs" title="Notas sobre este orçamento"></div></div>';
+  maskM($('or_val'));
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="saveOrc(\'' + cotId + '\')">Salvar Orçamento</button>';
+  openMo();
+}
+
+function saveOrc(cotId) {
+  const emp = $('or_emp').value, cnpj = $('or_cnpj').value, val = F.N($('or_val').value);
+  if (!emp) { alert('Informe o nome da empresa.'); return }
+  if (val <= 0) { alert('Informe o valor.'); return }
+  DB.ups('orcamentos', { id: uid(), cotacaoId: cotId, empresa: emp, cnpj, tel: $('or_tel').value, email: $('or_email').value, validade: $('or_val_dt').value, valor: val, obs: $('or_obs').value, vencedor: false });
+  // Update cotacao status
+  const orcs = DB.all('orcamentos').filter(o => o.cotacaoId === cotId);
+  if (orcs.length >= 3) { const ct = DB.one('cotacoes', cotId); if (ct && ct.status === 'aguardando') { ct.status = 'completa'; DB.ups('cotacoes', ct) } }
+  DB.log('orcamento', emp + ' — ' + F.R(val)); closeMo(); showCot(cotId);
+}
+
+/* ═══════════════ MAPA COMPARATIVO ═══════════════ */
+function openMapaComp(cotId) {
+  const ct = DB.one('cotacoes', cotId); if (!ct) return;
+  const orcs = DB.all('orcamentos').filter(o => o.cotacaoId === cotId).sort((a, b) => a.valor - b.valor);
+  $('moT').textContent = 'Mapa Comparativo de Preços';
+  $('moB').innerHTML = '<div class="al al-i" title="Selecione o vencedor">Clique em "Selecionar" no fornecedor vencedor. Se não for o menor preço, justifique.</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">' + orcs.map((o, i) => {
+      const isMin = i === 0;
+      return '<div class="mc-card" title="' + (isMin ? '✅ Menor preço' : '') + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="mc-name">' + o.empresa + (isMin ? ' <span class="badge b-green" style="margin-left:4px">Menor Preço</span>' : '') + '</div><div class="mc-cnpj">CNPJ: ' + (o.cnpj || '—') + ' · Val: ' + F.D(o.validade) + (o.obs ? ' · ' + o.obs : '') + '</div></div><div style="text-align:right"><div class="mc-val">' + F.R(o.valor) + '</div><button class="btn btn-p btn-sm" onclick="selVencedor(\'' + cotId + '\',\'' + o.id + '\',' + isMin + ')" title="Definir como vencedor" style="margin-top:4px">Selecionar</button></div></div></div>'
+    }).join('') + '</div>';
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button>';
+  openMo();
+}
+
+function selVencedor(cotId, orcId, isMin) {
+  let just = '';
+  if (!isMin) { just = prompt('Este não é o menor preço. Justifique a escolha:'); if (!just || !just.trim()) { alert('Justificativa obrigatória quando não é o menor preço.'); return } }
+  // Mark winner
+  const orcs = DB.all('orcamentos').filter(o => o.cotacaoId === cotId);
+  orcs.forEach(o => { o.vencedor = o.id === orcId; if (o.id === orcId) o.justificativa = just; DB.ups('orcamentos', o) });
+  // Update cotacao
+  const ct = DB.one('cotacoes', cotId); if (ct) { ct.status = 'nf_pendente'; ct.vencedorId = orcId; DB.ups('cotacoes', ct) }
+  DB.log('vencedor', DB.one('orcamentos', orcId)?.empresa + ' para cotação ' + ct?.descricao);
+  closeMo(); alert('✅ Vencedor definido! Solicite a NF ao fornecedor.'); showCot(cotId);
+}
+
+/* ═══════════════ REGISTRAR NF (from cotação) ═══════════════ */
+function openRegNF(cotId) {
+  const ct = DB.one('cotacoes', cotId); if (!ct) return;
+  const orc = DB.all('orcamentos').find(o => o.cotacaoId === cotId && o.vencedor);
+  $('moT').textContent = 'Registrar Nota Fiscal';
+  $('moB').innerHTML = '<div class="al al-s" title="Fornecedor vencedor">✅ Fornecedor: <strong>' + (orc?.empresa || '—') + '</strong> · Valor orçado: <strong>' + F.R(orc?.valor || 0) + '</strong></div>' +
+    '<div class="sep">🧾 Dados da NF</div>' +
+    '<div class="g g3"><div class="fld"><label>Nº da NF</label><input id="nf_num" title="Número da nota fiscal"></div><div class="fld"><label>Data Emissão</label><input id="nf_dt" type="date" title="Data de emissão da NF"></div><div class="fld"><label>Valor da NF (R$)</label><input id="nf_val" placeholder="0,00" value="' + (orc ? (orc.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + '" title="Valor deve ser compatível with o orçamento vencedor"></div></div>' +
+    '<div class="g g2" style="margin-top:10px"><div class="fld"><label>Fornecedor</label><input id="nf_forn" value="' + (orc?.empresa || '') + '" title="Razão social do fornecedor"></div><div class="fld"><label>CNPJ</label><input id="nf_cnpj" value="' + (orc?.cnpj || '') + '" title="CNPJ do fornecedor"></div></div>' +
+    '<div class="fld" style="margin-top:10px"><label>Descrição dos Itens</label><textarea id="nf_desc" rows="2" title="Itens conforme NF">' + (ct.descricao || '') + '</textarea></div>' +
+    '<div class="sep" style="margin-top:14px">📸 Fotos do Bem Adquirido (obrigatório)</div>' +
+    '<div class="al al-w" title="Material permanente exige fotos">⚠️ Para material permanente, é obrigatório enviar fotos do bem adquirido.</div>' +
+    '<div id="fotoPreview" class="foto-grid"></div>' +
+    '<div style="margin-top:8px"><label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg3);border-radius:var(--r-sm);cursor:pointer;font-size:.82rem;text-transform:none;letter-spacing:0;font-weight:500" title="Selecionar fotos do bem adquirido">📷 Adicionar Fotos<input type="file" accept="image/*" multiple onchange="handleFotos(this)" style="display:none"></label></div>';
+  maskM($('nf_val'));
+  window._fotos = [];
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="saveNFfromCot(\'' + cotId + '\')">Salvar NF</button>';
+  openMo();
+}
+
+function handleFotos(input) {
+  const files = input.files;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const leg = prompt('Legenda para esta foto (ex: "Equipamento — vista frontal"):', file.name) || file.name;
+      window._fotos.push({ data: e.target.result, legenda: leg });
+      renderFotoPreview();
+    }; reader.readAsDataURL(file);
+  });
+}
+function renderFotoPreview() {
+  const el = $('fotoPreview'); if (!el) return;
+  el.innerHTML = window._fotos.map((f, i) => '<div class="foto-item" title="' + f.legenda + '"><img src="' + f.data + '"><div class="foto-del" onclick="window._fotos.splice(' + i + ',1);renderFotoPreview()" title="Remover foto">✕</div></div>').join('');
+}
+
+function saveNFfromCot(cotId) {
+  const ct = DB.one('cotacoes', cotId); if (!ct) return;
+  const num = $('nf_num').value, dt = $('nf_dt').value, val = F.N($('nf_val').value), forn = $('nf_forn').value, cnpj = $('nf_cnpj').value;
+  if (!num) { alert('Informe o número da NF.'); return }
+  if (val <= 0) { alert('Informe o valor.'); return }
+  if (!window._fotos || window._fotos.length === 0) { alert('Fotos obrigatórias para material permanente. Adicione pelo menos uma foto.'); return }
+  // Create NF
+  const nfData = { id: uid(), cotacaoId: cotId, emendaId: ct.emendaId, rubricaId: ct.rubricaId, numNF: num, dataNF: dt, valor: val, fornecedor: forn, cnpj, descricao: $('nf_desc').value, fotos: window._fotos, status: 'nf_registrada', tipo: 'permanente' };
+  DB.ups('notas_fiscais', nfData);
+  // Move saldo: comprometido → empenhado
+  const comps = DB.all('comprometidos').filter(c => c.cotacaoId === cotId);
+  comps.forEach(c => { c.status = 'empenhado'; c.valor = val; DB.ups('comprometidos', c) });
+  // Update cotação
+  ct.status = 'nf_registrada'; DB.ups('cotacoes', ct);
+  DB.log('nf_registrada', num + ' — ' + F.R(val) + ' — ' + forn);
+  window._fotos = []; closeMo(); alert('✅ NF registrada! Fotos salvas. Aguardando pagamento no módulo Financeiro.'); go(curV);
+}
+
+/* ═══════════════ DESPESA CONSUMO (direto NF) ═══════════════ */
+function openNewConsumo() {
+  const ems = DB.all('emendas').filter(e => e.status !== 'encerrada');
+  if (!ems.length) { alert('Cadastre uma emenda primeiro.'); return }
+  $('moT').textContent = 'Nova Despesa — Material de Consumo';
+  $('moB').innerHTML = '<div class="al al-i" title="Consumo não exige cotação">ℹ️ Material de consumo não exige cotação. Registre diretamente a NF.</div>' +
+    '<div class="sep">📋 Dados da Despesa</div>' +
+    '<div class="g g2"><div class="fld"><label>Emenda</label><select id="dc_em" title="Selecione a emenda"><option value="">Selecione...</option>' + ems.map(e => '<option value="' + e.id + '">' + (e.codigo || '—') + ' — ' + (e.descricao || '').slice(0, 35) + '</option>').join('') + '</select></div>' +
+    '<div class="fld"><label>Rubrica</label><select id="dc_rub" title="Selecione a rubrica"></select></div></div>' +
+    '<div class="sep" style="margin-top:14px">🧾 Nota Fiscal</div>' +
+    '<div class="g g3"><div class="fld"><label>Nº da NF</label><input id="dc_num" title="Número da NF"></div><div class="fld"><label>Data Emissão</label><input id="dc_dt" type="date" title="Data de emissão"></div><div class="fld"><label>Valor (R$)</label><input id="dc_val" placeholder="0,00" title="Valor da NF"></div></div>' +
+    '<div class="g g2" style="margin-top:10px"><div class="fld"><label>Fornecedor</label><input id="dc_forn" title="Razão social"></div><div class="fld"><label>CNPJ</label><input id="dc_cnpj" title="CNPJ do fornecedor"></div></div>' +
+    '<div class="fld" style="margin-top:10px"><label>Descrição</label><textarea id="dc_desc" rows="2" title="Itens adquiridos"></textarea></div>';
+  maskM($('dc_val'));
+  // Bind emenda change -> reload rubricas
+  $('dc_em').addEventListener('change', function () { loadRubsSel(this.value, 'dc_rub', 'MC') });
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Cancelar</button><button class="btn btn-p" onclick="saveConsumo()">Salvar</button>';
+  openMo();
+}
+
+function saveConsumo() {
+  const emId = $('dc_em').value, rubId = $('dc_rub').value, num = $('dc_num').value, val = F.N($('dc_val').value);
+  if (!emId || !rubId) { alert('Selecione emenda e rubrica.'); return }
+  if (!num) { alert('Informe o número da NF.'); return }
+  if (val <= 0) { alert('Informe o valor.'); return }
+  const disp = rubDisp(rubId);
+  if (val > disp) { alert('Valor excede saldo disponível da rubrica (' + F.R(disp) + '). Reduza ou faça remanejamento.'); return }
+  // Create NF + empenhar direto
+  const nfData = { id: uid(), emendaId: emId, rubricaId: rubId, numNF: num, dataNF: $('dc_dt').value, valor: val, fornecedor: $('dc_forn').value, cnpj: $('dc_cnpj').value, descricao: $('dc_desc').value, fotos: [], status: 'nf_registrada', tipo: 'consumo' };
+  DB.ups('notas_fiscais', nfData);
+  DB.ups('comprometidos', { id: uid(), emendaId: emId, rubricaId: rubId, nfId: nfData.id, valor: val, status: 'empenhado' });
+  DB.log('consumo_nf', num + ' — ' + F.R(val));
+  closeMo(); alert('✅ Despesa de consumo registrada! Aguardando pagamento no módulo Financeiro.'); go(curV);
+}
+
+/* ═══════════════ NOTAS FISCAIS LIST ═══════════════ */
+function rNFs(c) {
+  const nfs = DB.all('notas_fiscais');
+  const totVal = nfs.reduce((s, n) => s + (n.valor || 0), 0);
+  c.innerHTML = '<div class="bc"><a onclick="go(\'compras\')">Compras</a> › Notas Fiscais</div>' +
+    '<div class="kpi-g" style="grid-template-columns:repeat(3,1fr)"><div class="kpi" style="cursor:default" title="Total de NFs"><div class="kpi-lb">Notas Fiscais</div><div class="kpi-vl">' + nfs.length + '</div></div><div class="kpi" style="cursor:default" title="Valor total"><div class="kpi-lb">Valor Total</div><div class="kpi-vl">' + F.R(totVal) + '</div></div><div class="kpi" style="cursor:default" title="Aguardando pagamento"><div class="kpi-lb">Aguardando Pgto</div><div class="kpi-vl">' + nfs.filter(n => n.status === 'nf_registrada').length + '</div></div></div>' +
+    (nfs.length === 0 ? '<div class="empty"><div class="empty-ic">🧾</div><div class="empty-t">Nenhuma NF registrada.</div></div>' :
+      '<div class="tbl-w"><table class="tbl"><thead><tr><th>Nº NF</th><th>Data</th><th>Fornecedor</th><th>Tipo</th><th>Valor</th><th>Emenda</th><th>Status</th><th>Fotos</th><th>Ações</th></tr></thead><tbody>' +
+      nfs.map(n => { const rub = DB.one('rubricas', n.rubricaId); const tn = rub ? tipoNome(rub.tipo) : (n.tipo || '—'); return '<tr><td class="mono">' + n.numNF + '</td><td>' + F.D(n.dataNF) + '</td><td title="' + n.fornecedor + '">' + ((n.fornecedor || '—').slice(0, 25)) + '</td><td><span class="badge ' + (n.tipo === 'permanente' ? 'b-blue' : 'b-green') + '" title="' + tn + '">' + tn + '</span></td><td class="mono">' + F.R(n.valor) + '</td><td title="' + emNome(n.emendaId) + '">' + emNome(n.emendaId).slice(0, 20) + '</td><td>' + stBadge(n.status) + '</td><td title="' + (n.fotos?.length || 0) + ' fotos">' + (n.fotos?.length ? '📸 ' + n.fotos.length : '—') + '</td><td><button class="btn-i" onclick="showNFDetail(\'' + n.id + '\')" title="Ver detalhes">👁️</button></td></tr>' }).join('') + '</tbody></table></div>');
+}
+
+function showNFDetail(id) {
+  const n = DB.one('notas_fiscais', id); if (!n) return;
+  $('moT').textContent = 'NF ' + n.numNF;
+  const rub = DB.one('rubricas', n.rubricaId); const tn = rub ? tipoNome(rub.tipo) : (n.tipo || '—');
+  $('moB').innerHTML = '<div class="tbl-w"><table class="tbl"><tbody><tr><td><strong>Nº NF</strong></td><td>' + n.numNF + '</td><td><strong>Data</strong></td><td>' + F.D(n.dataNF) + '</td></tr><tr><td><strong>Fornecedor</strong></td><td>' + n.fornecedor + '</td><td><strong>CNPJ</strong></td><td>' + (n.cnpj || '—') + '</td></tr><tr><td><strong>Valor</strong></td><td class="mono">' + F.R(n.valor) + '</td><td><strong>Tipo</strong></td><td><span class="badge ' + (n.tipo === 'permanente' ? 'b-blue' : 'b-green') + '" title="' + tn + '">' + tn + '</span></td></tr><tr><td><strong>Emenda</strong></td><td>' + emNome(n.emendaId) + '</td><td><strong>Rubrica</strong></td><td>' + rubNome(n.rubricaId) + '</td></tr><tr><td><strong>Descrição</strong></td><td colspan="3">' + (n.descricao || '—') + '</td></tr></tbody></table></div>' +
+    (n.fotos && n.fotos.length ? '<div class="sep" style="margin-top:14px">📸 Fotos do Bem (' + n.fotos.length + ')</div><div class="foto-grid">' + n.fotos.map(f => '<div class="foto-item" title="' + (f.legenda || 'Foto') + '"><img src="' + f.data + '"></div>').join('') + '</div>' : '');
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button>'; openMo();
+}
+
+
+/* ════════════════ MÓDULO FINANCEIRO ════════════════ */
+
+function rFin(c) {
+  const ems = DB.all('emendas'); let tRec = 0, tGas = 0, tSaldo = 0;
+  const stats = ems.map(e => { const s = calcES(e); tRec += s.rec; tGas += s.gasto; tSaldo += s.saldo; return { ...e, ...s }; });
+  c.innerHTML = '<div class="kpi-g">' +
+    '<div class="kpi"><div class="kpi-lb">Total Recebido</div><div class="kpi-vl">' + F.R(tRec) + '</div></div>' +
+    '<div class="kpi"><div class="kpi-lb">Total Saídas</div><div class="kpi-vl">' + F.R(tGas) + '</div></div>' +
+    '<div class="kpi"><div class="kpi-lb">Saldo Banco</div><div class="kpi-vl">' + F.R(tSaldo) + '</div></div></div>' +
+    '<div class="tbl-w"><table class="tbl"><thead><tr><th>Emenda</th><th>Recebido</th><th>Pago</th><th>Saldo</th><th>Ações</th></tr></thead><tbody>' +
+    stats.map(e => '<tr><td>' + e.codigo + '—' + e.descricao.slice(0, 20) + '</td><td class="mono">' + F.R(e.rec) + '</td><td class="mono">' + F.R(e.gasto) + '</td><td class="mono"><strong>' + F.R(e.saldo) + '</strong></td><td><div class="row-acts"><button class="btn-i" onclick="openCredito(\'' + e.id + '\')">💰</button><button class="btn-i" onclick="openDevol(\'' + e.id + '\')">↩️</button></div></td></tr>').join('') + '</tbody></table></div>';
+}
+
+function rCC(c) {
+  const ems = DB.all('emendas'); if (!ems.length) return;
+  const selId = localStorage.getItem('ibea_sel_cc') || ems[0].id, sel = DB.one('emendas', selId) || ems[0];
+  const creds = DB.all('creditos').filter(x => x.emendaId === sel.id).map(x => ({ ...x, _tipo: 'cr', _dt: x.data }));
+  const pgtos = DB.all('pagamentos').filter(x => x.emendaId === sel.id).map(x => ({ ...x, _tipo: 'db', _dt: x.data }));
+  const rends = DB.all('rendimentos').filter(x => x.emendaId === sel.id).map(x => ({ ...x, _tipo: 'cr', _dt: x.data, descricao: 'Rendimento' }));
+  const devols = DB.all('devolucoes').filter(x => x.emendaId === sel.id).map(x => ({ ...x, _tipo: 'db', _dt: x.data, descricao: 'Devolução' }));
+  const all = [...creds, ...pgtos, ...rends, ...devols].sort((a, b) => (a._dt || '').localeCompare(b._dt || ''));
+  let sAcc = 0; all.forEach(x => { if (x._tipo === 'cr') sAcc += x.valor; else sAcc -= x.valor; x._s = sAcc; });
+
+  c.innerHTML = '<div style="margin-bottom:18px"><select onchange="localStorage.setItem(\'ibea_sel_cc\',this.value);go(\'cc\')">' + ems.map(e => '<option value="' + e.id + '"' + (e.id === sel.id ? ' selected' : '') + '>' + emNome(e.id) + '</option>').join('') + '</select></div>' +
+    '<div class="tbl-w">' + (all.length ? all.reverse().map(x => '<div class="ext-row"><div class="ext-dt">' + F.D(x._dt) + '</div><div class="ext-desc">' + (x.descricao || 'Pgto') + '</div><div class="ext-val ' + (x._tipo === 'cr' ? 'cr' : 'db') + '">' + F.R(x.valor) + '</div><div class="ext-saldo">' + F.R(x._s) + '</div></div>').join('') : 'Nenhum lançamento.') + '</div>';
+}
+
+function openCredito(emId) {
+  $('moT').textContent = 'Receber Crédito';
+  $('moB').innerHTML = '<div class="g g2"><div class="fld"><label>Data</label><input id="cr_dt" type="date" value="' + new Date().toISOString().slice(0, 10) + '"></div><div class="fld"><label>Valor</label><input id="cr_val"></div></div>';
+  maskM($('cr_val')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="saveCredito(\'' + emId + '\')">Salvar</button>'; openMo();
+}
+function saveCredito(emId) {
+  const val = F.N($('cr_val').value); if (val <= 0) return;
+  DB.ups('creditos', { id: uid(), emendaId: emId, data: $('cr_dt').value, valor: val, descricao: 'Repasse recebido' });
+  DB.log('credito', F.R(val)); closeMo(); go(curV);
+}
+
+function openRendimento(emId) {
+  $('moT').textContent = 'Rendimento';
+  $('moB').innerHTML = '<div class="g g2"><div class="fld"><label>Data</label><input id="rd_dt" type="date" value="' + new Date().toISOString().slice(0, 10) + '"></div><div class="fld"><label>Valor</label><input id="rd_val"></div></div>';
+  maskM($('rd_val')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="saveRendimento(\'' + emId + '\')">Salvar</button>'; openMo();
+}
+function saveRendimento(emId) {
+  const val = F.N($('rd_val').value); if (val <= 0) return;
+  DB.ups('rendimentos', { id: uid(), emendaId: emId, data: $('rd_dt').value, valor: val });
+  closeMo(); go(curV);
+}
+
+function openDevol(emId) {
+  $('moT').textContent = 'Devolução';
+  $('moB').innerHTML = '<div class="g g2"><div class="fld"><label>Data</label><input id="dv_dt" type="date" value="' + new Date().toISOString().slice(0, 10) + '"></div><div class="fld"><label>Valor</label><input id="dv_val"></div></div>';
+  maskM($('dv_val')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="saveDevol(\'' + emId + '\')">Confirmar</button>'; openMo();
+}
+function saveDevol(emId) {
+  const val = F.N($('dv_val').value); if (val <= 0) return;
+  DB.ups('devolucoes', { id: uid(), emendaId: emId, data: $('dv_dt').value, valor: val });
+  closeMo(); go(curV);
+}
+
+function rPgtos(c) {
+  const nfs = DB.all('notas_fiscais').filter(n => n.status === 'nf_registrada'), pgs = DB.all('pagamentos');
+  c.innerHTML = '<div class="sep">⏳ Pendentes</div>' +
+    (nfs.length ? '<div class="tbl-w"><table class="tbl"><tbody>' + nfs.map(n => '<tr><td>' + n.numNF + '</td><td>' + F.R(n.valor) + '</td><td><button class="btn btn-p btn-sm" onclick="openPgto(\'' + n.id + '\')">Pagar</button></td></tr>').join('') + '</tbody></table></div>' : 'Nenhuma NF pendente.') +
+    '<div class="sep">✅ Realizados</div>' +
+    '<div class="tbl-w"><table class="tbl"><tbody>' + pgs.map(p => '<tr><td>' + F.D(p.data) + '</td><td>' + (p.fornecedor || '—') + '</td><td class="mono">' + F.R(p.valor) + '</td><td><button class="btn-i" onclick="showPgtoDetail(\'' + p.id + '\')">👁️</button></td></tr>').join('') + '</tbody></table></div>';
+}
+
+function openPgto(nfId) {
+  const nf = DB.one('notas_fiscais', nfId); if (!nf) return;
+  $('moT').textContent = 'Pagar NF ' + nf.numNF;
+  $('moB').innerHTML = '<div class="g g3"><div class="fld"><label>Data</label><input id="pg_dt" type="date" value="' + new Date().toISOString().slice(0, 10) + '"></div><div class="fld"><label>Valor</label><input id="pg_val" value="' + nf.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + '"></div><div class="fld"><label>Forma</label><select id="pg_forma"><option value="transferencia">Transferência</option><option value="especie">Espécie</option></select></div></div>';
+  maskM($('pg_val')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="savePgto(\'' + nfId + '\')">Pagar</button>'; openMo();
+}
+function savePgto(nfId) {
+  const nf = DB.one('notas_fiscais', nfId), val = F.N($('pg_val').value); if (val <= 0) return;
+  const pg = { id: uid(), nfId, emendaId: nf.emendaId, rubricaId: nf.rubricaId, data: $('pg_dt').value, valor: val, forma: $('pg_forma').value, numNF: nf.numNF, fornecedor: nf.fornecedor };
+  DB.ups('pagamentos', pg); nf.status = 'paga'; DB.ups('notas_fiscais', nf);
+  if (nf.cotacaoId) { const ct = DB.one('cotacoes', nf.cotacaoId); if (ct) { ct.status = 'paga'; DB.ups('cotacoes', ct); } }
+  const comps = DB.all('comprometidos').filter(x => x.cotacaoId === nf.cotacaoId || x.nfId === nfId); comps.forEach(x => DB.del('comprometidos', x.id));
+  closeMo(); go(curV);
+}
+function showPgtoDetail(id) {
+  const p = DB.one('pagamentos', id); if (!p) return;
+  $('moT').textContent = 'Pgto NF ' + p.numNF;
+  $('moB').innerHTML = F.D(p.data) + ' · ' + F.R(p.valor) + ' · ' + p.fornecedor;
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button>'; openMo();
+}
+
+function rConc(c) {
+  const ems = DB.all('emendas'); if (!ems.length) return;
+  const selId = localStorage.getItem('ibea_sel_conc') || ems[0].id, sel = DB.one('emendas', selId) || ems[0];
+  const s = calcES(sel); const concs = DB.all('conciliacoes').filter(x => x.emendaId === sel.id).sort((a, b) => b.data.localeCompare(a.data));
+  c.innerHTML = '<div style="margin-bottom:18px"><select onchange="localStorage.setItem(\'ibea_sel_conc\',this.value);go(\'conc\')">' + ems.map(e => '<option value="' + e.id + '"' + (e.id === sel.id ? ' selected' : '') + '>' + emNome(e.id) + '</option>').join('') + '</select></div>' +
+    '<div class="kpi-g"><div class="kpi"><div class="kpi-lb">Sistema</div><div class="kpi-vl">' + F.R(s.saldo) + '</div></div><div class="kpi"><div class="kpi-lb">Banco</div><div class="kpi-vl">' + (concs[0] ? F.R(concs[0].saldoBanco) : '—') + '</div></div></div>' +
+    '<button class="btn btn-p" onclick="openConc(\'' + sel.id + '\')">+ Conciliar</button>' +
+    '<div class="tbl-w"><table class="tbl"><tbody>' + concs.map(cn => '<tr><td>' + F.D(cn.data) + '</td><td>Banco: ' + F.R(cn.saldoBanco) + '</td><td>Sis: ' + F.R(cn.saldoSistema) + '</td></tr>').join('') + '</tbody></table></div>';
+}
+function openConc(emId) {
+  $('moT').textContent = 'Conciliar';
+  $('moB').innerHTML = '<div class="fld"><label>Data</label><input id="cn_dt" type="date" value="' + new Date().toISOString().slice(0, 10) + '"></div><div class="fld"><label>Saldo Banco</label><input id="cn_val"></div>';
+  maskM($('cn_val')); $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="saveConc(\'' + emId + '\')">Salvar</button>'; openMo();
+}
+function saveConc(emId) {
+  const dt = $('cn_dt').value, val = F.N($('cn_val').value); if (!dt) return;
+  const cr = DB.all('creditos').filter(x => x.emendaId === emId && x.data <= dt).reduce((s, x) => s + (x.valor || 0), 0);
+  const pg = DB.all('pagamentos').filter(x => x.emendaId === emId && x.data <= dt).reduce((s, x) => s + (x.valor || 0), 0);
+  const rd = DB.all('rendimentos').filter(x => x.emendaId === emId && x.data <= dt).reduce((s, x) => s + (x.valor || 0), 0);
+  const dv = DB.all('devolucoes').filter(x => x.emendaId === emId && x.data <= dt).reduce((s, x) => s + (x.valor || 0), 0);
+  const sSis = cr + rd - pg - dv;
+  DB.ups('conciliacoes', { id: uid(), emendaId: emId, data: dt, saldoBanco: val, saldoSistema: sSis });
+  closeMo(); go(curV);
+}
+
+/* ════════════════ MÓDULO PRESTAÇÃO DE CONTAS ════════════════ */
+
+function rPC(c) {
+  const ems = DB.all('emendas'); if (!ems.length) return;
+  c.innerHTML = '<div class="tbl-w"><table class="tbl"><thead><tr><th>Emenda</th><th>Ações</th></tr></thead><tbody>' +
+    ems.map(e => '<tr><td>' + emNome(e.id) + '</td><td><button class="btn btn-p btn-sm" onclick="genRelObj(\'' + e.id + '\')">Objeto</button> <button class="btn btn-s btn-sm" onclick="genRelFin(\'' + e.id + '\')">Financ.</button></td></tr>').join('') + '</tbody></table></div>';
+}
+
+function genRelObj(emId) {
+  const e = DB.one('emendas', emId); if (!e) return; const s = calcES(e); const pl = DB.one('planos', emId) || {};
+  $('moT').textContent = 'Relatório Objeto';
+  $('moB').innerHTML = '<div class="rpt"><h4>RELATÓRIO DE EXECUÇÃO DO OBJETO</h4>' +
+    '<div class="rpt-row"><span>Emenda</span><span>' + e.codigo + '</span></div><div class="rpt-row"><span>Objeto</span><span>' + e.descricao + '</span></div>' +
+    '<div class="sep">🎯 Metas</div><div style="font-size:.8rem">' + (pl.metas || '—') + '</div></div>';
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button>'; openMo();
+}
+function genRelFin(emId) {
+  const e = DB.one('emendas', emId); if (!e) return; const s = calcES(e);
+  $('moT').textContent = 'Relatório Financeiro';
+  $('moB').innerHTML = '<div class="rpt"><h4>RELATÓRIO DE EXECUÇÃO FINANCEIRA</h4>' +
+    '<div class="rpt-row"><span>Recebido</span><span>' + F.R(s.rec) + '</span></div><div class="rpt-row"><span>Gasto</span><span>' + F.R(s.gasto) + '</span></div><div class="rpt-row"><span>Saldo</span><span>' + F.R(s.saldo) + '</span></div></div>';
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Fechar</button>'; openMo();
+}
+
+function rTransp(c) {
+  const ems = DB.all('emendas');
+  c.innerHTML = ems.map(e => { const s = calcES(e); return '<div class="tp-card"><h4>' + e.descricao + '</h4><div class="rpt-row"><span>Parlamentar</span><span>' + e.parlamentar + '</span></div><div class="rpt-row"><span>Valor</span><span>' + F.R(s.prev) + '</span></div></div>' }).join('');
+}
+
+/* ════════════════ MÓDULO CONFIGURAÇÕES ════════════════ */
+
+function rOrg(c) {
+  const o = JSON.parse(localStorage.getItem('ibea_cad_org') || '{}');
+  c.innerHTML = '<div class="fld"><label>Nome da Organização</label><input id="org_n" value="' + (o.nome || '') + '"></div>' +
+    '<div class="logo-preview" onclick="$(\'l_in\').click()" id="lp_0">' + (o.logos?.[0] ? '<img src="' + o.logos[0] + '">' : 'Logo') + '</div>' +
+    '<input type="file" id="l_in" style="display:none" onchange="hLU(this)">' +
+    '<button class="btn btn-p" style="margin-top:14px" onclick="svOrg()">Salvar</button>';
+}
+function hLU(input) {
+  const r = new FileReader(); r.onload = e => {
+    const o = JSON.parse(localStorage.getItem('ibea_cad_org') || '{}'); if (!o.logos) o.logos = [];
+    o.logos[0] = e.target.result; localStorage.setItem('ibea_cad_org', JSON.stringify(o)); go('org'); loadOrg();
+  }; r.readAsDataURL(input.files[0]);
+}
+function svOrg() {
+  const o = JSON.parse(localStorage.getItem('ibea_cad_org') || '{}'); o.nome = $('org_n').value;
+  localStorage.setItem('ibea_cad_org', JSON.stringify(o)); loadOrg(); alert('Salvo!');
+}
+
+const CAD_TABS = [
+  { key: 'resp', label: '👥 Responsáveis', ns: 'responsaveis', fields: [{ id: 'nome', label: 'Nome', req: true }, { id: 'cpf', label: 'CPF' }, { id: 'cargo', label: 'Cargo' }] },
+  { key: 'contas', label: '🏦 Contas', ns: 'contas_correntes', fields: [{ id: 'banco', label: 'Banco', req: true }, { id: 'agencia', label: 'Ag' }, { id: 'conta', label: 'CC' }] },
+  { key: 'trub', label: '📦 Tipos Rubrica', ns: 'cad_tipo_rubrica', fields: [{ id: 'codigo', label: 'Sigla', req: true }, { id: 'descricao', label: 'Nome', req: true }] }
+];
+function rCad(c) {
+  const t = CAD_TABS.find(x => x.key === cadTab) || CAD_TABS[0], items = DB.all(t.ns);
+  c.innerHTML = '<div class="tabs">' + CAD_TABS.map(tb => '<div class="tab ' + (tb.key === cadTab ? 'act' : '') + '" onclick="cadTab=\'' + tb.key + '\';go(\'cad\')">' + tb.label + '</div>').join('') + '</div>' +
+    '<button class="btn btn-p btn-sm" onclick="openCadF(\'' + t.ns + '\')">+ Novo</button>' +
+    '<div class="tbl-w"><table class="tbl"><tbody>' + items.map(i => '<tr><td>' + (i.nome || i.descricao || i.banco || '—') + '</td><td><button class="btn-i" onclick="openCadF(\'' + t.ns + '\',\'' + i.id + '\')">✏️</button></td></tr>').join('') + '</tbody></table></div>';
+}
+function openCadF(ns, id) {
+  const t = CAD_TABS.find(x => x.ns === ns), item = id ? DB.one(ns, id) : {};
+  $('moT').textContent = (id ? 'Edit' : 'Novo') + ' ' + t.label;
+  $('moB').innerHTML = t.fields.map(f => '<div class="fld"><label>' + f.label + '</label><input id="cf_' + f.id + '" value="' + (item[f.id] || '') + '"></div>').join('');
+  $('moF').innerHTML = '<button class="btn btn-s" onclick="closeMo()">Sair</button><button class="btn btn-p" onclick="svCad(\'' + ns + '\',\'' + (id || '') + '\')">Salvar</button>'; openMo();
+}
+function svCad(ns, id) {
+  const t = CAD_TABS.find(x => x.ns === ns), item = { id: id || uid() };
+  t.fields.forEach(f => { item[f.id] = $('cf_' + f.id).value; }); DB.ups(ns, item); closeMo(); go('cad');
+}
+
+function rLog(c) {
+  const logs = DB.all('log').reverse();
+  c.innerHTML = '<div class="tbl-w"><table class="tbl"><tbody>' + logs.slice(0, 50).map(l => '<tr><td>' + new Date(l.ts).toLocaleString() + '</td><td>' + l.act + '</td><td>' + l.det + '</td></tr>').join('') + '</tbody></table></div>';
+}
+
+/* ════════════════ INIT ════════════════ */
+window.onload = () => {
+  initDef(); loadOrg();
+  const t = localStorage.getItem('ibea_theme'); if (t) document.documentElement.setAttribute('data-theme', t);
+  go('dash');
+};
+
+</script>
+</body>
+</html>
